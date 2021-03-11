@@ -825,7 +825,7 @@ pub unsafe trait KernelCfg2: Port + Sized {
     // Most associated items are hidden because they have no use outside the
     // kernel. The rest is not hidden because it's meant to be accessed by port
     // code.
-    #[doc(hiddden)]
+    #[doc(hidden)]
     type TimeoutHeap: VecLike<Element = timeout::TimeoutRef<Self>> + Init + fmt::Debug + 'static;
 
     /// The table of combined second-level interrupt handlers.
