@@ -30,7 +30,6 @@
 ///     ),
 /// );
 /// ```
-#[macro_export]
 pub macro pp_text_macro {
     (
         $vis:vis macro $name:ident {
