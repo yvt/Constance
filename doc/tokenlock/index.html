@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This crate provides a cell type, [`TokenLock`], whose contents can only be accessed by an unforgeable token."><meta name="keywords" content="rust, rustlang, rust-lang, tokenlock"><title>tokenlock - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../tokenlock/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate tokenlock</p><div class="block version"><p>Version 0.3.4</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all tokenlock's items</p></a><div class="block items"><ul><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="tokenlock" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">tokenlock</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/tokenlock/lib.rs.html#10-594" title="goto source code">[src]</a></span></h1><div class="docblock"><p>This crate provides a cell type, <a href="../tokenlock/struct.TokenLock.html" title="TokenLock"><code>TokenLock</code></a>, whose contents can only be
+accessed by an unforgeable token.</p>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1><h2 id="basics" class="section-header"><a href="#basics">Basics</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ArcToken</span>::<span class="ident">new</span>();
+
+<span class="kw">let</span> <span class="ident">lock</span> <span class="op">=</span> <span class="ident">TokenLock</span>::<span class="ident">new</span>(<span class="ident">token</span>.<span class="ident">id</span>(), <span class="number">1</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">lock</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">token</span>), <span class="number">1</span>);
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guard</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">token</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">guard</span>, <span class="number">1</span>);
+<span class="kw-2">*</span><span class="ident">guard</span> <span class="op">=</span> <span class="number">2</span>;</pre></div>
+<p>Only the original <a href="../tokenlock/trait.Token.html" title="Token"><code>Token</code></a>’s owner can access its contents. <code>Token</code>
+cannot be cloned:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">lock</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">TokenLock</span>::<span class="ident">new</span>(<span class="ident">token</span>.<span class="ident">id</span>(), <span class="number">1</span>));
+
+<span class="kw">let</span> <span class="ident">lock_1</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">lock</span>);
+<span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>().<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+    <span class="kw">let</span> <span class="ident">lock_1</span> <span class="op">=</span> <span class="ident">lock_1</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token_1</span> <span class="op">=</span> <span class="ident">token</span>;
+
+    <span class="comment">// I have `Token` so I can get a mutable reference to the contents</span>
+    <span class="ident">lock_1</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">token_1</span>);
+}).<span class="ident">unwrap</span>();
+
+<span class="comment">// can&#39;t access the contents; I no longer have `Token`</span>
+<span class="comment">// lock.write(&amp;mut token);</span></pre></div>
+<h2 id="lifetimes" class="section-header"><a href="#lifetimes">Lifetimes</a></h2>
+<p>The lifetime of the returned reference is limited by both of the <code>TokenLock</code>
+and <code>Token</code>.</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ArcToken</span>::<span class="ident">new</span>();
+<span class="kw">let</span> <span class="ident">lock</span> <span class="op">=</span> <span class="ident">TokenLock</span>::<span class="ident">new</span>(<span class="ident">token</span>.<span class="ident">id</span>(), <span class="number">1</span>);
+<span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">token</span>);
+<span class="ident">drop</span>(<span class="ident">lock</span>); <span class="comment">// compile error: `guard` cannot outlive `TokenLock`</span>
+<span class="ident">drop</span>(<span class="ident">guard</span>);</pre></div>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail">
+<span class="ident">drop</span>(<span class="ident">token</span>); <span class="comment">// compile error: `guard` cannot outlive `Token`</span>
+<span class="ident">drop</span>(<span class="ident">guard</span>);</pre></div>
+<p>It also prevents from forming a reference to the contained value when
+there already is a mutable reference to it:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail">
+<span class="kw">let</span> <span class="ident">write_guard</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">token</span>);
+<span class="kw">let</span> <span class="ident">read_guard</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">token</span>); <span class="comment">// compile error</span>
+<span class="ident">drop</span>(<span class="ident">write_guard</span>);</pre></div>
+<p>While allowing multiple immutable references:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">read_guard1</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">token</span>);
+<span class="kw">let</span> <span class="ident">read_guard2</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="ident">token</span>);</pre></div>
+<h2 id="use-case-linked-lists" class="section-header"><a href="#use-case-linked-lists">Use case: Linked lists</a></h2>
+<p>An operating system kernel often needs to store the global state in a global
+variable. Linked lists are a common data structure used in a kernel, but
+Rust’s ownership does not allow forming <code>'static</code> references into values
+protected by a mutex. Common work-arounds, such as smart pointers and index
+references, take a heavy toll on a small microcontroller with a single-issue
+in-order pipeline and no hardware multiplier.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="kw">struct</span> <span class="ident">Process</span> {
+    <span class="ident">prev</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&amp;</span> <span class="comment">/* what lifetime? */</span> <span class="ident">Process</span><span class="op">&gt;</span>,
+    <span class="ident">next</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&amp;</span> <span class="comment">/* what lifetime? */</span> <span class="ident">Process</span><span class="op">&gt;</span>,
+    <span class="ident">state</span>: <span class="ident">u8</span>,
+    <span class="comment">/* ... */</span>
+}
+<span class="kw">struct</span> <span class="ident">SystemState</span> {
+    <span class="ident">first_process</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&amp;</span> <span class="comment">/* what lifetime? */</span> <span class="ident">Process</span><span class="op">&gt;</span>,
+    <span class="ident">process_pool</span>: [<span class="ident">Process</span>; <span class="number">64</span>],
+}
+<span class="kw">static</span> <span class="ident">STATE</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">SystemState</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">todo</span><span class="macro">!</span>();</pre></div>
+<p><code>tokenlock</code> makes the <code>'static</code> reference approach possible by detaching the
+lock granularity from the protected data’s granularity.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">tokenlock</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>;
+<span class="kw">struct</span> <span class="ident">Tag</span>;
+<span class="macro">impl_singleton_token_factory</span><span class="macro">!</span>(<span class="ident">Tag</span>);
+
+<span class="kw">type</span> <span class="ident">KLock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">UnsyncTokenLock</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">SingletonTokenId</span><span class="op">&lt;</span><span class="ident">Tag</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">KLockToken</span> <span class="op">=</span> <span class="ident">UnsyncSingletonToken</span><span class="op">&lt;</span><span class="ident">Tag</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">KLockTokenId</span> <span class="op">=</span> <span class="ident">SingletonTokenId</span><span class="op">&lt;</span><span class="ident">Tag</span><span class="op">&gt;</span>;
+
+<span class="kw">struct</span> <span class="ident">Process</span> {
+    <span class="ident">prev</span>: <span class="ident">KLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Process</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">next</span>: <span class="ident">KLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Process</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">state</span>: <span class="ident">KLock</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+    <span class="comment">/* ... */</span>
+}
+<span class="kw">struct</span> <span class="ident">SystemState</span> {
+    <span class="ident">first_process</span>: <span class="ident">KLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Process</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">process_pool</span>: [<span class="ident">Process</span>; <span class="number">1</span>],
+}
+<span class="kw">static</span> <span class="ident">STATE</span>: <span class="ident">SystemState</span> <span class="op">=</span> <span class="ident">SystemState</span> {
+    <span class="ident">first_process</span>: <span class="ident">KLock</span>::<span class="ident">new</span>(<span class="ident">KLockTokenId</span>::<span class="ident">new</span>(), <span class="prelude-val">None</span>),
+    <span class="ident">process_pool</span>: [
+        <span class="ident">Process</span> {
+            <span class="ident">prev</span>: <span class="ident">KLock</span>::<span class="ident">new</span>(<span class="ident">KLockTokenId</span>::<span class="ident">new</span>(), <span class="prelude-val">None</span>),
+            <span class="ident">next</span>: <span class="ident">KLock</span>::<span class="ident">new</span>(<span class="ident">KLockTokenId</span>::<span class="ident">new</span>(), <span class="prelude-val">None</span>),
+            <span class="ident">state</span>: <span class="ident">KLock</span>::<span class="ident">new</span>(<span class="ident">KLockTokenId</span>::<span class="ident">new</span>(), <span class="number">0</span>),
+        }
+    ],
+};</pre></div>
+<h1 id="token-types" class="section-header"><a href="#token-types">Token types</a></h1>
+<p>This crate provides the following types implementing <a href="../tokenlock/trait.Token.html" title="Token"><code>Token</code></a>.</p>
+<p>(<strong><code>std</code> only</strong>) [<code>RcToken</code>] and [<code>ArcToken</code>] ensure their uniqueness by
+reference-counted memory allocations.</p>
+<p><a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a><code>&lt;Tag&gt;</code> is a singleton token, meaning only one of such
+instance can exist at any point of time during the program’s execution.
+<a href="../tokenlock/macro.impl_singleton_token_factory.html" title="impl_singleton_token_factory!"><code>impl_singleton_token_factory!</code></a> instantiates a <code>static</code> flag to indicate
+<code>SingletonToken</code>’s liveness and allows you to construct it safely by
+<a href="../tokenlock/struct.SingletonToken.html#method.new" title="SingletonToken::new"><code>SingletonToken::new</code></a>. Alternatively, you can use
+<a href="../tokenlock/struct.SingletonToken.html#method.new_unchecked" title="SingletonToken::new_unchecked"><code>SingletonToken::new_unchecked</code></a>, but this is unsafe if misused.</p>
+<h1 id="sync-tokens" class="section-header"><a href="#sync-tokens"><code>!Sync</code> tokens</a></h1>
+<p><a href="../tokenlock/struct.UnsyncTokenLock.html" title="UnsyncTokenLock"><code>UnsyncTokenLock</code></a> is similar to <code>TokenLock</code> but designed for non-<code>Sync</code>
+tokens and has relaxed requirements on the inner type for thread safety.
+Specifically, it can be <code>Sync</code> even if the inner type is not <code>Sync</code>. This
+allows for storing non-<code>Sync</code> cells such as <a href="https://doc.rust-lang.org/nightly/core/cell/struct.Cell.html"><code>Cell</code></a> and reading and
+writing them using shared references (all of which must be on the same
+thread because the token is <code>!Sync</code>) to the token.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">Cell</span>;
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ArcToken</span>::<span class="ident">new</span>();
+<span class="kw">let</span> <span class="ident">lock</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">UnsyncTokenLock</span>::<span class="ident">new</span>(<span class="ident">token</span>.<span class="ident">id</span>(), <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">1</span>)));
+
+<span class="kw">let</span> <span class="ident">lock_1</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="ident">lock</span>);
+<span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>().<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+    <span class="comment">// &quot;Lock&quot; the token to the current thread using</span>
+    <span class="comment">// `ArcToken::borrow_as_unsync`</span>
+    <span class="kw">let</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">token</span>.<span class="ident">borrow_as_unsync</span>();
+
+    <span class="comment">// Shared references can alias</span>
+    <span class="kw">let</span> (<span class="ident">token_1</span>, <span class="ident">token_2</span>) <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">token</span>, <span class="kw-2">&amp;</span><span class="ident">token</span>);
+
+    <span class="ident">lock_1</span>.<span class="ident">read</span>(<span class="ident">token_1</span>).<span class="ident">set</span>(<span class="number">2</span>);
+    <span class="ident">lock_1</span>.<span class="ident">read</span>(<span class="ident">token_2</span>).<span class="ident">set</span>(<span class="number">4</span>);
+}).<span class="ident">unwrap</span>();</pre></div>
+<p><code>!Sync</code> tokens, of course, cannot be shared between threads:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ArcToken</span>::<span class="ident">new</span>();
+<span class="kw">let</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">token</span>.<span class="ident">borrow_as_unsync</span>();
+<span class="kw">let</span> (<span class="ident">token_1</span>, <span class="ident">token_2</span>) <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">token</span>, <span class="kw-2">&amp;</span><span class="ident">token</span>);
+
+<span class="comment">// compile error: `&amp;ArcTokenUnsyncRef` is not `Send` because</span>
+<span class="comment">//                `ArcTokenUnsyncRef` is not `Sync`</span>
+<span class="ident">thread</span>::<span class="ident">Builder</span>::<span class="ident">new</span>().<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">token_2</span>;
+});
+
+<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">token_1</span>;</pre></div>
+</div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.impl_singleton_token_factory.html" title="tokenlock::impl_singleton_token_factory macro">impl_singleton_token_factory</a></td><td class="docblock-short"><p>Implement <a href="../tokenlock/trait.SingletonTokenFactory.html" title="SingletonTokenFactory"><code>SingletonTokenFactory</code></a> on a given type.</p>
+</td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.BadTokenError.html" title="tokenlock::BadTokenError struct">BadTokenError</a></td><td class="docblock-short"><p>Error type returned when a key (<a href="../tokenlock/trait.Token.html" title="Token"><code>Token</code></a>) doesn’t fit in a keyhole
+(<a href="../tokenlock/struct.TokenLock.html#method.keyhole" title="TokenLock::keyhole"><code>TokenLock::keyhole</code></a>).</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonToken.html" title="tokenlock::SingletonToken struct">SingletonToken</a></td><td class="docblock-short"><p>A singleton unforgeable token used to access the contents of a
+<code>TokenLock</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonTokenExhaustedError.html" title="tokenlock::SingletonTokenExhaustedError struct">SingletonTokenExhaustedError</a></td><td class="docblock-short"><p>Error type returned when <a href="../tokenlock/struct.SingletonToken.html#method.new" title="SingletonToken::new"><code>SingletonToken::new</code></a> was called, but a token
+has already been issued, and a new one cannot be issued until the old one
+is returned to the factory by dropping <a href="../tokenlock/struct.SingletonTokenGuard.html" title="SingletonTokenGuard"><code>SingletonTokenGuard</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonTokenGuard.html" title="tokenlock::SingletonTokenGuard struct">SingletonTokenGuard</a></td><td class="docblock-short"><p>The RAII guard for a <a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a> obtained through
+<a href="../tokenlock/struct.SingletonToken.html#method.new" title="SingletonToken::new"><code>SingletonToken::new</code></a>. Returns the token to the factory automatically
+when dropped.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonTokenId.html" title="tokenlock::SingletonTokenId struct">SingletonTokenId</a></td><td class="docblock-short"><p>Token that cannot be used to access the contents of a <a href="../tokenlock/struct.TokenLock.html"><code>TokenLock</code></a>, but can
+be used to create a new <code>TokenLock</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonTokenRef.html" title="tokenlock::SingletonTokenRef struct">SingletonTokenRef</a></td><td class="docblock-short"><p>Zero-sized logical equivalent of <code>&amp;'a </code><a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a><code>&lt;Tag&gt;</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SingletonTokenRefMut.html" title="tokenlock::SingletonTokenRefMut struct">SingletonTokenRefMut</a></td><td class="docblock-short"><p>Zero-sized logical equivalent of <code>&amp;'a mut </code><a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a><code>&lt;Tag&gt;</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.TokenLock.html" title="tokenlock::TokenLock struct">TokenLock</a></td><td class="docblock-short"><p>A mutual exclusive primitive that can be accessed using a <a href="../tokenlock/trait.Token.html" title="Token"><code>Token</code></a><code>&lt;Keyhole&gt;</code>
+with a very low overhead.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.UnsyncTokenLock.html" title="tokenlock::UnsyncTokenLock struct">UnsyncTokenLock</a></td><td class="docblock-short"><p>Like <a href="../tokenlock/struct.TokenLock.html" title="TokenLock"><code>TokenLock</code></a>, but the usable <a href="../tokenlock/trait.Token.html" title="Token"><code>Token</code></a>s are constrained by <a href="../tokenlock/trait.Unsync.html" title="Unsync"><code>Unsync</code></a>.
+This subtle difference allows it to be <code>Sync</code> even if <code>T</code> is not.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.SingletonTokenFactory.html" title="tokenlock::SingletonTokenFactory trait">SingletonTokenFactory</a></td><td class="docblock-short"><p>Associates a type with a flag indicating whether an instance of
+<a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a><code>&lt;Self&gt;</code> is present.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Token.html" title="tokenlock::Token trait">Token</a></td><td class="docblock-short"><p>Trait for an unforgeable token used to access the contents of a
+<a href="../tokenlock/struct.TokenLock.html" title="TokenLock"><code>TokenLock</code></a><code>&lt;_, Keyhole&gt;</code>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Unsync.html" title="tokenlock::Unsync trait">Unsync</a></td><td class="docblock-short"><p>Asserts the types implementing this trait are <code>!</code><a href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="Sync"><code>Sync</code></a>. (Negative bounds
+are not supported by the compiler at the point of writing, so this trait
+must be implemented manually.)</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.UnsyncSingletonToken.html" title="tokenlock::UnsyncSingletonToken type">UnsyncSingletonToken</a></td><td class="docblock-short"><p>The <code>!Sync</code> variant of <a href="../tokenlock/struct.SingletonToken.html" title="SingletonToken"><code>SingletonToken</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.UnsyncSingletonTokenGuard.html" title="tokenlock::UnsyncSingletonTokenGuard type">UnsyncSingletonTokenGuard</a></td><td class="docblock-short"><p>The <code>!Sync</code> variant of <a href="../tokenlock/struct.SingletonTokenGuard.html" title="SingletonTokenGuard"><code>SingletonTokenGuard</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.UnsyncSingletonTokenRef.html" title="tokenlock::UnsyncSingletonTokenRef type">UnsyncSingletonTokenRef</a></td><td class="docblock-short"><p>Zero-sized logical equivalent of <code>&amp;'a </code><a href="../tokenlock/type.UnsyncSingletonToken.html" title="UnsyncSingletonToken"><code>UnsyncSingletonToken</code></a><code>&lt;Tag&gt;</code>. The
+<code>!Sync</code> variant of <a href="../tokenlock/struct.SingletonTokenRef.html" title="SingletonTokenRef"><code>SingletonTokenRef</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.UnsyncSingletonTokenRefMut.html" title="tokenlock::UnsyncSingletonTokenRefMut type">UnsyncSingletonTokenRefMut</a></td><td class="docblock-short"><p>Zero-sized logical equivalent of <code>&amp;'a mut </code><a href="../tokenlock/type.UnsyncSingletonToken.html" title="UnsyncSingletonToken"><code>UnsyncSingletonToken</code></a><code>&lt;Tag&gt;</code>. The
+<code>!Sync</code> variant of <a href="../tokenlock/struct.SingletonTokenRefMut.html" title="SingletonTokenRefMut"><code>SingletonTokenRefMut</code></a>.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="tokenlock" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

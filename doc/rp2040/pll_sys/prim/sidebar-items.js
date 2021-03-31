@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["POSTDIV1_W","Write proxy for field `POSTDIV1`"],["POSTDIV2_W","Write proxy for field `POSTDIV2`"]],"type":[["POSTDIV1_R","Reader of field `POSTDIV1`"],["POSTDIV2_R","Reader of field `POSTDIV2`"],["R","Reader of register PRIM"],["W","Writer for register PRIM"]]});

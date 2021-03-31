@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["bod","brown-out detection control"],["chip_reset","Chip reset control and status"],["vreg","Voltage regulator control and status"]],"struct":[["RegisterBlock","Register block"]],"type":[["BOD","brown-out detection control"],["CHIP_RESET","Chip reset control and status"],["VREG","Voltage regulator control and status"]]});

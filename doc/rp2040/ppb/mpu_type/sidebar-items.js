@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DREGION_R","Reader of field `DREGION`"],["IREGION_R","Reader of field `IREGION`"],["R","Reader of register MPU_TYPE"],["SEPARATE_R","Reader of field `SEPARATE`"]]});

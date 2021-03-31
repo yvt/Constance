@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DIED_R","Reader of field `DIED`"],["DONE_R","Reader of field `DONE`"],["FAIL_R","Reader of field `FAIL`"],["FAST_R","Reader of field `FAST`"],["PASS_R","Reader of field `PASS`"],["R","Reader of register FC0_STATUS"],["RUNNING_R","Reader of field `RUNNING`"],["SLOW_R","Reader of field `SLOW`"],["WAITING_R","Reader of field `WAITING`"]]});

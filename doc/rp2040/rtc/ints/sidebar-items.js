@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register INTS"],["RTC_R","Reader of field `RTC`"]]});

@@ -1,0 +1,373 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The RISC-V port for the R3 kernel."><meta name="keywords" content="rust, rustlang, rust-lang, r3_port_riscv"><title>r3_port_riscv - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../r3_port_riscv/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate r3_port_riscv</p><div class="block version"><p>Version 0.1.1</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all r3_port_riscv's items</p></a><div class="block items"><ul><li><a href="#macros">Macros</a></li><li><a href="#constants">Constants</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="r3_port_riscv" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">r3_port_riscv</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/r3_port_riscv/lib.rs.html#1-229" title="goto source code">[src]</a></span></h1><div class="docblock"><p>The RISC-V port for <a href="../r3/index.html">the R3 kernel</a>.</p>
+<h1 id="startup-code" class="section-header"><a href="#startup-code">Startup code</a></h1>
+<p><a href="../r3_port_riscv/macro.use_rt.html" title="use_rt!"><code>use_rt!</code></a> hooks up the entry points (<a href="../r3_port_riscv/trait.EntryPoint.html" title="EntryPoint"><code>EntryPoint</code></a>) using <code>#[</code>[<code>::riscv_rt::entry</code>]<code>]</code>. If this is not desirable for some reason, you can opt not to use it and call the entry points in other ways.</p>
+<h1 id="interrupts" class="section-header"><a href="#interrupts">Interrupts</a></h1>
+<p>This port supports the basic interrupt handling model from the RISC-V specification.</p>
+<p>Other interrupt handling models such as <a href="https://github.com/riscv/riscv-fast-interrupt">RISC-V Core-Local Interrupt Controller</a> are not supported.</p>
+<h2 id="local-interrupts" class="section-header"><a href="#local-interrupts">Local Interrupts</a></h2>
+<p>The first few interrupt numbers are allocated for interrupts defined by the RISC-V privileged architecture (Machine software interrupts, timer interrupts, and external interrupts), which we collectively call <strong>local interrupts</strong>. The <a href="../r3/kernel/interrupt/struct.InterruptHandler.html">second-level interrupt handlers</a> for these interrupt numbers are called with their respective interrupts disabled (<code>mie.M[STE]IE = 0</code>) and global interrupts enabled (<code>mstatus.MIE = 1</code>).</p>
+<table><thead><tr><th>Interrupt Type</th><th>Interrupt Number</th><th>Can <a href="../r3/kernel/interrupt/struct.InterruptLine.html#method.pend">Pend</a>?</th></tr></thead><tbody>
+<tr><td>Software</td><td><a href="../r3_port_riscv/constant.INTERRUPT_SOFTWARE.html" title="INTERRUPT_SOFTWARE"><code>INTERRUPT_SOFTWARE</code></a></td><td>Yes</td></tr>
+<tr><td>Timer</td><td><a href="../r3_port_riscv/constant.INTERRUPT_TIMER.html" title="INTERRUPT_TIMER"><code>INTERRUPT_TIMER</code></a></td><td>No</td></tr>
+<tr><td>External</td><td><a href="../r3_port_riscv/constant.INTERRUPT_EXTERNAL.html" title="INTERRUPT_EXTERNAL"><code>INTERRUPT_EXTERNAL</code></a></td><td>No</td></tr>
+</tbody></table>
+<p>The local interrupts <strong>follow a fixed priority scheme</strong> in which they are handled in the following decreasing priority order: External, Software, Timer. Interrupts with a higher priority can preempt lower ones, but not the other way. This is realized by carefully controlling the enable bits in the top-level interrupt handler.</p>
+<p>The interrupt handler of a particular interrupt number can re-enable the interrupts of the said interrupt number to allow re-entry by preemption (this is useful for external interrupts, which usually have multiple interrupt sources with varying priorities).</p>
+<p>The local interrupts are always enabled from an API point of view. <strong><a href="../r3/kernel/interrupt/struct.InterruptLine.html#method.disable"><code>InterruptLine::disable</code></a> will always return <a href="../r3/kernel/error/enum.EnableInterruptLineError.html#variant.NotSupported"><code>NotSupported</code></a></strong>.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Rationale:</strong> Because their enable bits are toggled frequently in the top-level interrupt handler, removing the ability to disable these interrupts simplifies the implementation and reduces interupt latency. This should pose no problems for most cases.</p>
+</blockquote>
+<p>The local interrupts are always <a href="../r3/index.html#interrupt-handling-framework"><em>managed</em></a>. This is because CPU Lock is currently mapped to <code>mstatus.MIE</code> (global interrupt-enable).</p>
+<h2 id="interrupt-controller" class="section-header"><a href="#interrupt-controller">Interrupt Controller</a></h2>
+<p>The remaining interrupt numbers (≥ <a href="../r3_port_riscv/constant.INTERRUPT_PLATFORM_START.html" title="INTERRUPT_PLATFORM_START"><code>INTERRUPT_PLATFORM_START</code></a>) are controlled by <strong>an interrupt controller driver</strong>.</p>
+<p><span class="center"><img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iYm9iIiBmb250LWZhbWlseT0iJ1NvdXJjZSBDb2RlIFBybycsJ0FuZGFsZSBNb25vJywnU2Vnb2UgVUkgTW9ubycsJ0RlamF2dSBTYW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNCIgaGVpZ2h0PSIyNTYiIHdpZHRoPSI2ODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bWFya2VyIGlkPSJ0cmlhbmdsZSIgbWFya2VySGVpZ2h0PSI4IiBtYXJrZXJXaWR0aD0iOCIgb3JpZW50PSJhdXRvIiByZWZYPSI0IiByZWZZPSIyIiB2aWV3Qm94PSIwIDAgOCA0Ij4KPHBvbHlnb24gY2xhc3M9ImZnX2ZpbGwiIHBvaW50cz0iMCwwIDAsNCA4LDIgMCwwIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjbGVhcl90cmlhbmdsZSIgbWFya2VySGVpZ2h0PSIxMCIgbWFya2VyV2lkdGg9IjEwIiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEiIHJlZlk9IjciIHZpZXdCb3g9IjAgMCAyMCAxNCI+Cjxwb2x5Z29uIGNsYXNzPSJiZ19maWxsIiBwb2ludHM9IjIsMiAyLDEyIDE4LDcgMiwyIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjaXJjbGUiIG1hcmtlckhlaWdodD0iNSIgbWFya2VyV2lkdGg9IjUiIG9yaWVudD0iYXV0byIgcmVmWD0iMTAiIHJlZlk9IjEwIiB2aWV3Qm94PSIwIDAgMjAgMjAiPgo8Y2lyY2xlIGNsYXNzPSJmZ19maWxsIiBjeD0iMTAiIGN5PSIxMCIgcj0iOCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ic3F1YXJlIiBtYXJrZXJIZWlnaHQ9IjUiIG1hcmtlcldpZHRoPSI1IiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEwIiByZWZZPSIxMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KPHJlY3QgY2xhc3M9ImZnX2ZpbGwiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgeD0iMCIgeT0iMCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ib3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMTAiIG1hcmtlcldpZHRoPSIxMCIgb3JpZW50PSJhdXRvIiByZWZYPSIxMCIgcmVmWT0iMTAiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIxMCIgY3k9IjEwIiByPSI0Ii8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJiaWdfb3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMjAiIG1hcmtlcldpZHRoPSIyMCIgb3JpZW50PSJhdXRvIiByZWZYPSIyMCIgcmVmWT0iMjAiIHZpZXdCb3g9IjAgMCA0MCA0MCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIyMCIgY3k9IjIwIiByPSI2Ii8+CjwvbWFya2VyPgo8L2RlZnM+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgpyZWN0LmJhY2tkcm9wIHsKICAgIGZpbGw6IHdoaXRlOwp9CnRleHR7CiAgICBmaWxsOiBibGFjazsKfQoKY2lyY2xlIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9CgpsaW5lIHsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCnBhdGggewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCmxpbmUuZGFzaGVkIHsKICAgIHN0cm9rZS1kYXNoYXJyYXk6IDU7Cn0KCi5mZ19maWxsIHsKICAgIGZpbGw6IGJsYWNrOwp9CgoKLmJnX2ZpbGwgewogICAgZmlsbDogd2hpdGU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9Cgp0c3Bhbi5oZWFkewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKfQogICAgCjwvc3R5bGU+CjxyZWN0IGNsYXNzPSJiYWNrZHJvcCIgaGVpZ2h0PSIyNTYiIHdpZHRoPSI2ODAiIHg9IjAiIHk9IjAiLz4KPGc+CjxsaW5lIHgxPSIyMCIgeDI9IjIwIiB5MT0iMTA4IiB5Mj0iMTMyIi8+CjxwYXRoIGQ9Ik0gMjAgMTMyIEEgNCA0IDAgMCAwIDI0IDEzNiIvPgo8cGF0aCBkPSJNIDI0IDEwNCBBIDQgNCAwIDAgMCAyMCAxMDgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI0IiB4Mj0iMTEyIiB5MT0iMTA0IiB5Mj0iMTA0Ii8+CjxwYXRoIGQ9Ik0gMTE2IDEwOCBBIDQgNCAwIDAgMCAxMTIgMTA0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNCIgeDI9IjExMiIgeTE9IjEzNiIgeTI9IjEzNiIvPgo8cGF0aCBkPSJNIDExMiAxMzYgQSA0IDQgMCAwIDAgMTE2IDEzMiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTE2IiB4Mj0iMTE2IiB5MT0iMTA4IiB5Mj0iMTMyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxMjgiIHgyPSIxNDgiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjE0OCIgeDI9IjE0OCIgeTE9IjkyIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSIxNDgiIHgyPSIxNDgiIHkxPSIxMjAiIHkyPSIxNDgiLz4KPGxpbmUgeDE9IjE0OCIgeDI9IjE2OCIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iMTY4IiB4Mj0iMTc2IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMTc2IiB4Mj0iMTk2IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxwYXRoIGQ9Ik0gMTQ4IDE0OCBBIDQgNCAwIDAgMCAxNTIgMTUyIi8+CjxwYXRoIGQ9Ik0gMTUyIDg4IEEgNCA0IDAgMCAwIDE0OCA5MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTUyIiB4Mj0iMTY4IiB5MT0iODgiIHkyPSI4OCIvPgo8bGluZSB4MT0iMTY4IiB4Mj0iMTc2IiB5MT0iODgiIHkyPSI4OCIvPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjE3NiIgeDI9IjE5NiIgeTE9Ijg4IiB5Mj0iODgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjE1MiIgeDI9IjE2OCIgeTE9IjE1MiIgeTI9IjE1MiIvPgo8bGluZSB4MT0iMTY4IiB4Mj0iMTc2IiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMTc2IiB4Mj0iMTk2IiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxNzIiIHgyPSIxNzIiIHkxPSIyOCIgeTI9IjgwIi8+CjxwYXRoIGQ9Ik0gMTcyIDk2IEEgMTAgMTAgMCAwIDAgMTcyIDgwIi8+CjxwYXRoIGQ9Ik0gMTc2IDI0IEEgNCA0IDAgMCAwIDE3MiAyOCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTcyIiB4Mj0iMTcyIiB5MT0iOTYiIHkyPSIxMTIiLz4KPHBhdGggZD0iTSAxNzIgMTI4IEEgMTAgMTAgMCAwIDAgMTcyIDExMiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTcyIiB4Mj0iMTcyIiB5MT0iMTI4IiB5Mj0iMTQ0Ii8+CjxwYXRoIGQ9Ik0gMTcyIDE2MCBBIDEwIDEwIDAgMCAwIDE3MiAxNDQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjE3MiIgeDI9IjE3MiIgeTE9IjE2MCIgeTI9IjE4MCIvPgo8cGF0aCBkPSJNIDE3MiAxODAgQSA0IDQgMCAwIDAgMTc2IDE4NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTc2IiB4Mj0iNjcyIiB5MT0iMjQiIHkyPSIyNCIvPgo8cGF0aCBkPSJNIDY3NiAyOCBBIDQgNCAwIDAgMCA2NzIgMjQiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCN0cmlhbmdsZSkiIHgxPSIxNzYiIHgyPSIxOTYiIHkxPSIxODQiIHkyPSIxODQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIxMiIgeDI9IjIxMiIgeTE9Ijc2IiB5Mj0iMTA0Ii8+CjxsaW5lIHgxPSIyMTIiIHgyPSIyMTIiIHkxPSIxMDQiIHkyPSIxMzYiLz4KPGxpbmUgeDE9IjIxMiIgeDI9IjI0NCIgeTE9IjEwNCIgeTI9IjEwNCIvPgo8bGluZSB4MT0iMjEyIiB4Mj0iMjEyIiB5MT0iMTM2IiB5Mj0iMTY4Ii8+CjxsaW5lIHgxPSIyMTIiIHgyPSIyNDQiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPGxpbmUgeDE9IjIxMiIgeDI9IjIxMiIgeTE9IjE2OCIgeTI9IjIwMCIvPgo8bGluZSB4MT0iMjEyIiB4Mj0iMjQ0IiB5MT0iMTY4IiB5Mj0iMTY4Ii8+CjxsaW5lIHgxPSIyMTIiIHgyPSIyMTIiIHkxPSIyMDAiIHkyPSIyMjgiLz4KPGxpbmUgeDE9IjIxMiIgeDI9IjI0NCIgeTE9IjIwMCIgeTI9IjIwMCIvPgo8bGluZSB4MT0iMjQ0IiB4Mj0iMjQ0IiB5MT0iNzIiIHkyPSIxMDQiLz4KPGxpbmUgeDE9IjI0NCIgeDI9IjM3NiIgeTE9IjcyIiB5Mj0iNzIiLz4KPGxpbmUgeDE9IjI0NCIgeDI9IjI0NCIgeTE9IjEwNCIgeTI9IjEzNiIvPgo8bGluZSB4MT0iMjQ0IiB4Mj0iMzgwIiB5MT0iMTA0IiB5Mj0iMTA0Ii8+CjxsaW5lIHgxPSIyNDQiIHgyPSIyNDQiIHkxPSIxMzYiIHkyPSIxNjgiLz4KPGxpbmUgeDE9IjI0NCIgeDI9IjM4MCIgeTE9IjEzNiIgeTI9IjEzNiIvPgo8bGluZSB4MT0iMjQ0IiB4Mj0iMjQ0IiB5MT0iMTY4IiB5Mj0iMjAwIi8+CjxsaW5lIHgxPSIyNDQiIHgyPSIzODAiIHkxPSIxNjgiIHkyPSIxNjgiLz4KPGxpbmUgeDE9IjI0NCIgeDI9IjI0NCIgeTE9IjIwMCIgeTI9IjIzMiIvPgo8bGluZSB4MT0iMjQ0IiB4Mj0iMzgwIiB5MT0iMjAwIiB5Mj0iMjAwIi8+CjxsaW5lIHgxPSIyNDQiIHgyPSIzNzYiIHkxPSIyMzIiIHkyPSIyMzIiLz4KPGxpbmUgeDE9IjM4MCIgeDI9IjM4MCIgeTE9Ijc2IiB5Mj0iMTA0Ii8+CjxsaW5lIHgxPSIzODAiIHgyPSIzODAiIHkxPSIxMDQiIHkyPSIxMzYiLz4KPGxpbmUgeDE9IjM4MCIgeDI9IjM4MCIgeTE9IjEzNiIgeTI9IjE2OCIvPgo8bGluZSB4MT0iMzgwIiB4Mj0iMzgwIiB5MT0iMTY4IiB5Mj0iMjAwIi8+CjxsaW5lIHgxPSIzODAiIHgyPSIzODAiIHkxPSIyMDAiIHkyPSIyMjgiLz4KPHBhdGggZD0iTSAyMTIgMjI4IEEgNCA0IDAgMCAwIDIxNiAyMzIiLz4KPHBhdGggZD0iTSAyMTYgNzIgQSA0IDQgMCAwIDAgMjEyIDc2Ii8+CjxwYXRoIGQ9Ik0gMzc2IDIzMiBBIDQgNCAwIDAgMCAzODAgMjI4Ii8+CjxwYXRoIGQ9Ik0gMzgwIDc2IEEgNCA0IDAgMCAwIDM3NiA3MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjE2IiB4Mj0iMjQ0IiB5MT0iNzIiIHkyPSI3MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjE2IiB4Mj0iMjQ0IiB5MT0iMjMyIiB5Mj0iMjMyIi8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMzkyIiB4Mj0iNDM2IiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIzOTIiIHgyPSI0MTYiIHkxPSIxODQiIHkyPSIxODQiLz4KPHBhdGggZD0iTSA0MjAgMTg4IEEgNCA0IDAgMCAwIDQxNiAxODQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQyMCIgeDI9IjQyMCIgeTE9IjE4OCIgeTI9IjIxMiIvPgo8cGF0aCBkPSJNIDQyMCAyMTIgQSA0IDQgMCAwIDAgNDI0IDIxNiIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjQyNCIgeDI9IjQ1MiIgeTE9IjIxNiIgeTI9IjIxNiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDUyIiB4Mj0iNDUyIiB5MT0iMTQwIiB5Mj0iMTY0Ii8+CjxwYXRoIGQ9Ik0gNDUyIDE2NCBBIDQgNCAwIDAgMCA0NTYgMTY4Ii8+CjxwYXRoIGQ9Ik0gNDU2IDEzNiBBIDQgNCAwIDAgMCA0NTIgMTQwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0NTYiIHgyPSI2MzIiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPHBhdGggZD0iTSA2MzYgMTQwIEEgNCA0IDAgMCAwIDYzMiAxMzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQ1NiIgeDI9IjYzMiIgeTE9IjE2OCIgeTI9IjE2OCIvPgo8cGF0aCBkPSJNIDYzMiAxNjggQSA0IDQgMCAwIDAgNjM2IDE2NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDY4IiB4Mj0iNDY4IiB5MT0iMjA0IiB5Mj0iMjQ0Ii8+CjxwYXRoIGQ9Ik0gNDY4IDI0NCBBIDQgNCAwIDAgMCA0NzIgMjQ4Ii8+CjxwYXRoIGQ9Ik0gNDcyIDIwMCBBIDQgNCAwIDAgMCA0NjggMjA0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0NzIiIHgyPSI2MzIiIHkxPSIyMDAiIHkyPSIyMDAiLz4KPHBhdGggZD0iTSA2MzYgMjA0IEEgNCA0IDAgMCAwIDYzMiAyMDAiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQ3MiIgeDI9IjYzMiIgeTE9IjI0OCIgeTI9IjI0OCIvPgo8cGF0aCBkPSJNIDYzMiAyNDggQSA0IDQgMCAwIDAgNjM2IDI0NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNjM2IiB4Mj0iNjM2IiB5MT0iMTQwIiB5Mj0iMTY0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI2MzYiIHgyPSI2MzYiIHkxPSIyMDQiIHkyPSIyNDQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjY0OCIgeDI9IjY3MiIgeTE9IjE1MiIgeTI9IjE1MiIvPgo8cGF0aCBkPSJNIDY3MiAxNTIgQSA0IDQgMCAwIDAgNjc2IDE0OCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNjc2IiB4Mj0iNjc2IiB5MT0iMjgiIHkyPSIxNDgiLz4KPC9nPgo8Zz4KPHRleHQgeD0iMzMiIHk9IjEyNCIgdGV4dExlbmd0aD0iNzIiPgpUb3AtTGV2ZWwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyMTciIHk9IjYwIiB0ZXh0TGVuZ3RoPSIxNDQiPgpJTlRFUlJVUFRfSEFORExFUlMKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyMjUiIHk9IjkyIiB0ZXh0TGVuZ3RoPSI4Ij4KMAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjIyNSIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSI4Ij4KMQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjIyNSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI4Ij4KMgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjIyNSIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSI4Ij4KMwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjIyNSIgeT0iMjIwIiB0ZXh0TGVuZ3RoPSI4Ij4KNAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI1NyIgeT0iOTIiIHRleHRMZW5ndGg9IjY0Ij4KU29mdHdhcmUKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNTciIHk9IjEyNCIgdGV4dExlbmd0aD0iNDAiPgpUaW1lcgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI1NyIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI2NCI+CkV4dGVybmFsCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMjU3IiB5PSIxODgiIHRleHRMZW5ndGg9IjE2Ij4KSUMKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNTciIHk9IjIyMCIgdGV4dExlbmd0aD0iMTYiPgpJQwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI4MSIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI4MSIgeT0iMjIwIiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjM2MSIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSI4Ij4KMAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjM2MSIgeT0iMjIwIiB0ZXh0TGVuZ3RoPSI4Ij4KMQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQzMyIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ2NSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ4MSIgeT0iMjIwIiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ4MSIgeT0iMjM2IiB0ZXh0TGVuZ3RoPSIyNCI+CmZvcgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjUxMyIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSI4MCI+CkNvbnRyb2xsZXIKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI1MTMiIHk9IjIzNiIgdGV4dExlbmd0aD0iMTYiPgpJQwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjUzNyIgeT0iMjM2IiB0ZXh0TGVuZ3RoPSI3MiI+CkludGVycnVwdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjU0NSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI4MCI+CkRpc3BhdGNoZXIKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI1NjEiIHk9IjIyMCIgdGV4dExlbmd0aD0iNTYiPgpIYW5kbGVyCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNjAxIiB5PSIxMjQiIHRleHRMZW5ndGg9IjQ4Ij4KRHJpdmVyCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNjE3IiB5PSIyMzYiIHRleHRMZW5ndGg9IjgiPgowCjwvdGV4dD4KPC9nPgo8L3N2Zz4=" alt="interrupts" /></span></p>
+<p>Usually, there are more than one interrupt source connected to the external interrupt pin of a hart through an interrupt controller. An interrupt controller driver is responsible for determining the source of an external interrupt and dispatching the appropriate handler. At configuration time, it attaches an interrupt handler to <a href="../r3_port_riscv/constant.INTERRUPT_EXTERNAL.html" title="INTERRUPT_EXTERNAL"><code>INTERRUPT_EXTERNAL</code></a>. The interrupt handler, when called, queries the currently pending interrupt (let’s assume the interrupt number is <code>n</code>). It can set <code>mie.MEIE</code> to allow nested interrupts (assuming the underlying hardware supports that). Then it fetches the corresponding interrupt handler by indexing <a href="../r3/kernel/trait.KernelCfg2.html#associatedconstant.INTERRUPT_HANDLERS"><code>INTERRUPT_HANDLERS</code></a> by <code>n + INTERRUPT_PLATFORM_START</code> and calls that.</p>
+<p>The <a href="../r3/kernel/trait.PortInterrupts.html"><code>PortInterrupts</code></a> implementation generated by <code>use_port!</code> delegates method calls to an interrupt controller driver through <a href="../r3_port_riscv/trait.InterruptController.html" title="InterruptController"><code>InterruptController</code></a> for these interrupt numbers.</p>
+<p>Your system type should be combined with an interrupt controller driver by implementing <a href="../r3_port_riscv/trait.InterruptController.html" title="InterruptController"><code>InterruptController</code></a>. Most systems are equipped with <a href="https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc">Platform-Level Interrupt Controller (PLIC)</a>, whose driver is provided by <a href="../r3_port_riscv/macro.use_plic.html" title="use_plic!"><code>use_plic!</code></a>. PLIC does not support pending or clearing interrupt lines.</p>
+<h1 id="emulation" class="section-header"><a href="#emulation">Emulation</a></h1><h2 id="lrsc-emulation" class="section-header"><a href="#lrsc-emulation"><code>LR</code>/<code>SC</code> Emulation</a></h2>
+<p>The <strong><code>emulate-lr-sc</code></strong> Cargo feature enables the software emulation of the <code>lr</code> (load-reserved) and <code>sc</code> (store-conditional) instructions. This is useful for a target that supports atomic memory operations but doesn’t support these particular instructions, such as FE310. The following limitations should be kept in mind when using this feature:</p>
+<ul>
+<li>The software emulation is slow and non-preemptive (increases the worst-case interrupt latency).</li>
+<li>The addition of the software emulation code introduces a non-negligible code size overhead.</li>
+<li>It doesn’t do actual bus snooping and therefore it will behave incorrectly if there’s another bus master<!-- TODO: find a better, non-offensive word --> controlling the same memory address.</li>
+<li>Instructions with <code>rd = sp</code> are not supported and will behave incorrectly. This shouldn’t be a problem in practice.</li>
+<li>It doesn’t do actual bus snooping and can’t detect a conflicting memory write that doesn’t modify the memory contents. This shouldn’t be a problem for the atomic operations currently provided by the standard library.</li>
+</ul>
+<p><code>lr</code> and <code>sc</code> instructions are generated when the program uses atomic operations that aren’t covered by AMO instructions (e.g., <code>Atomic*::compare_and_swap</code>).</p>
+<h2 id="mstatusmpie-maintenance" class="section-header"><a href="#mstatusmpie-maintenance"><code>mstatus.MPIE</code> Maintenance</a></h2>
+<p>The <strong><code>maintain-pie</code></strong> Cargo feature enables the work-around for the hardware quirk where the <code>mret</code> instruction clears <code>mstatus.MPIE</code> in violation of the specification. This quirk is found in QEMU 4.2 and K210. The common symptom is methods returning <code>Err(BadContext)</code>.</p>
+<h1 id="implementation" class="section-header"><a href="#implementation">Implementation</a></h1>
+<p>The CPU Lock state is mapped to <code>mstatus.MIE</code> (global interrupt-enable). Unmanaged interrupts aren’t supported.</p>
+<h2 id="context-state" class="section-header"><a href="#context-state">Context State</a></h2>
+<p>The state of an interrupted thread is stored to the interrupted thread’s stack in the following form:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ContextState</span> {
+    <span class="comment">// Second-level state (SLS)</span>
+    <span class="comment">// ------------------------</span>
+    <span class="comment">//</span>
+    <span class="comment">// Includes everything that is not included in the first-level state. These</span>
+    <span class="comment">// are moved between memory and registers only when switching tasks.</span>
+
+    <span class="comment">// SLS.HDR: Second-level state, header</span>
+    <span class="comment">//</span>
+    <span class="comment">// The `mstatus` field preserves the state of `mstatus.FS[1]`.</span>
+    <span class="comment">// `mstatus.FS[0]` is assumed to `1`. This means `mstatus.FS` can only take</span>
+    <span class="comment">// one of the following states: Initial and Dirty.</span>
+    <span class="comment">// Irrelevant bits are don&#39;t-care (hence `_part`).</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">mstatus_part</span>: <span class="ident">usize</span>,
+
+    <span class="comment">// SLS.F: Second-level state, FP registers</span>
+    <span class="comment">//</span>
+    <span class="comment">// This portion exists only if `mstatus.FS[1] != 0`.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">f8</span>: [<span class="ident">FReg</span>; <span class="number">2</span>],  <span class="comment">// fs0-fs1</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">f18</span>: [<span class="ident">FReg</span>; <span class="number">10</span>], <span class="comment">// fs2-fs11</span>
+
+    <span class="comment">// SLS.X: Second-level state, X registers</span>
+    <span class="ident">x8</span>: <span class="ident">usize</span>,  <span class="comment">// s0/fp</span>
+    <span class="ident">x9</span>: <span class="ident">usize</span>,  <span class="comment">// s1</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x18</span>: <span class="ident">usize</span>, <span class="comment">// s2</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x19</span>: <span class="ident">usize</span>, <span class="comment">// s3</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x20</span>: <span class="ident">usize</span>, <span class="comment">// s4</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x21</span>: <span class="ident">usize</span>, <span class="comment">// s5</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x22</span>: <span class="ident">usize</span>, <span class="comment">// s6</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x23</span>: <span class="ident">usize</span>, <span class="comment">// s7</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x24</span>: <span class="ident">usize</span>, <span class="comment">// s8</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x25</span>: <span class="ident">usize</span>, <span class="comment">// s9</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x26</span>: <span class="ident">usize</span>, <span class="comment">// s10</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;e&quot;</span>))]</span>
+    <span class="ident">x27</span>: <span class="ident">usize</span>, <span class="comment">// s11</span>
+
+    <span class="comment">// First-level state (FLS)</span>
+    <span class="comment">// -----------------------</span>
+    <span class="comment">//</span>
+    <span class="comment">// This section is comprised of caller-saved registers. In an exception</span>
+    <span class="comment">// handler, saving/restoring this set of registers at entry and exit allows</span>
+    <span class="comment">// it to call Rust functions.</span>
+    <span class="comment">//</span>
+    <span class="comment">// The registers are ordered in the encoding order (rather than grouping</span>
+    <span class="comment">// them by their purposes, as done by Linux and FreeBSD) to improve the</span>
+    <span class="comment">// compression ratio very slightly when transmitting the code over a</span>
+    <span class="comment">// network.</span>
+
+    <span class="comment">// FLS.F: First-level state, FP registers</span>
+    <span class="comment">//</span>
+    <span class="comment">// This portion exists only if `mstatus.FS[1] != 0`.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">f0</span>: [<span class="ident">FReg</span>; <span class="number">8</span>],  <span class="comment">// ft0-ft7</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">f10</span>: [<span class="ident">FReg</span>; <span class="number">8</span>], <span class="comment">// fa0-fa7</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_feature</span> <span class="op">=</span> <span class="string">&quot;f&quot;</span>)]</span>
+    <span class="ident">f28</span>: [<span class="ident">FReg</span>; <span class="number">4</span>], <span class="comment">// ft8-ft11</span>
+    <span class="ident">fcsr</span>: <span class="ident">usize</span>,
+    <span class="ident">_pad</span>: [<span class="ident">u8</span>; (<span class="ident">max</span>(<span class="ident">FLEN</span>, <span class="ident">XLEN</span>) <span class="op">-</span> <span class="ident">XLEN</span>) <span class="op">/</span> <span class="number">8</span>],
+
+    <span class="comment">// FLS.X: First-level state, X registers</span>
+    <span class="ident">x1</span>: <span class="ident">usize</span>,  <span class="comment">// ra</span>
+    <span class="ident">x5</span>: <span class="ident">usize</span>,  <span class="comment">// t0</span>
+    <span class="ident">x6</span>: <span class="ident">usize</span>,  <span class="comment">// t1</span>
+    <span class="ident">x7</span>: <span class="ident">usize</span>,  <span class="comment">// t2</span>
+    <span class="ident">x10</span>: <span class="ident">usize</span>, <span class="comment">// a0</span>
+    <span class="ident">x11</span>: <span class="ident">usize</span>, <span class="comment">// a1</span>
+    <span class="ident">x12</span>: <span class="ident">usize</span>, <span class="comment">// a2</span>
+    <span class="ident">x13</span>: <span class="ident">usize</span>, <span class="comment">// a3</span>
+    <span class="ident">x14</span>: <span class="ident">usize</span>, <span class="comment">// a4</span>
+    <span class="ident">x15</span>: <span class="ident">usize</span>, <span class="comment">// a5</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x16</span>: <span class="ident">usize</span>, <span class="comment">// a6</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x17</span>: <span class="ident">usize</span>, <span class="comment">// a7</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x28</span>: <span class="ident">usize</span>, <span class="comment">// t3</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x29</span>: <span class="ident">usize</span>, <span class="comment">// t4</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x30</span>: <span class="ident">usize</span>, <span class="comment">// t5</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">e</span>))]</span>
+    <span class="ident">x31</span>: <span class="ident">usize</span>, <span class="comment">// t6</span>
+    <span class="ident">pc</span>: <span class="ident">usize</span>, <span class="comment">// original program counter</span>
+}</pre></div>
+<p><code>x2</code> (<code>sp</code>) is stored in <a href="../r3/kernel/task/struct.TaskCb.html#structfield.port_task_state"><code>TaskCb::port_task_state</code></a>. The stored stack pointer is only aligned to word boundaries.</p>
+<p>The idle task (the implicit task that runs when <code>*</code><a href="../r3/kernel/struct.State.html#method.running_task_ptr"><code>running_task_ptr</code></a><code>().is_none()</code>) always execute with <code>sp == 0</code>. For the idle task, saving and restoring the context store is essentially replaced with no-op or loads of hard-coded values. In particular, <code>pc</code> is always “restored” with the entry point of the idle task.</p>
+<p>When a task is activated, a new context state is created inside the task’s stack. By default, only essential registers are preloaded with known values. The <strong><code>preload-registers</code></strong> Cargo feature enables preloading for all <code>x</code> registers, which might help in debugging at the cost of performance and code size.</p>
+<p>The trap handler stores a first-level state directly below the current stack pointer. This means <strong>the stack pointer must be aligned to a <code>max(XLEN, FLEN)</code>-bit boundary all the time</strong>. This requirement is weaker than the standard ABI’s requirement, so it shouldn’t pose a problem for most cases.</p>
+<h2 id="processor-modes" class="section-header"><a href="#processor-modes">Processor Modes</a></h2>
+<p>All code executes in Machine mode. The value of <code>mstatus.MPP</code> is always <code>M</code> (<code>0b11</code>).</p>
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--
+FIXME: Work-around for `svgbobdoc` not supporting `#[doc(include = ...)]`
+       or `rustdoc` not integrating `svgbob` yet ;)
+       Related: <https://github.com/ivanceras/svgbob/issues/26>
+
+```svgbob
+
+                     ,--------------------------------------------------------------,
+                     |                                                              |
+                     |     "INTERRUPT_HANDLERS"                                     |
+                     |    ,---+----------------,                                    |
+                  ,--)-\> | 0 | Software       |                                    |
+  ,-----------,   |  |    +---+----------------+                                    |
+  | Top-Level | --+--)-\> | 1 | Timer          |      Interrupt Controller Driver   |
+  '-----------'   |  |    +---+----------------+        ,----------------------,    |
+                  '--)-\> | 2 | External       | ----\> | Interrupt Dispatcher | ---'
+                     |    +---+----------------+        '----------------------'
+                     '-\> | 3 | IC Interrupt 0 | ---,
+                          +---+----------------+    |     ,--------------------,
+                          | 4 | IC Interrupt 1 |    '--\> | Interrupt Handler  |
+                          '---+----------------'          | for IC Interrupt 0 |
+                                                          '--------------------'
+
+```
+
+The following data URI was generated by processing the above text through `svgbobdoc`. Make sure to replace `\>` with `->`.
+-->
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script></div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.use_plic.html" title="r3_port_riscv::use_plic macro">use_plic</a></td><td class="docblock-short"><p>Implement <a href="../r3_port_riscv/trait.InterruptController.html"><code>InterruptController</code></a> and <a href="../r3_port_riscv/trait.Plic.html" title="Plic"><code>Plic</code></a> on the given system type
+using the Platform-Level Interrupt Controller (PLIC) on the target.
+<strong>Requires <a href="../r3_port_riscv/trait.PlicOptions.html" title="PlicOptions"><code>PlicOptions</code></a>.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_port.html" title="r3_port_riscv::use_port macro">use_port</a></td><td class="docblock-short"><p>Define a system type implementing <a href="../r3/kernel/trait.PortThreading.html"><code>PortThreading</code></a>, <a href="../r3/kernel/trait.PortInterrupts.html"><code>PortInterrupts</code></a>, and
+<a href="../r3_port_riscv/trait.EntryPoint.html"><code>EntryPoint</code></a>.
+<strong>Requires <a href="../r3_port_riscv/trait.ThreadingOptions.html" title="ThreadingOptions"><code>ThreadingOptions</code></a> and <a href="../r3_port_riscv/trait.InterruptController.html"><code>InterruptController</code></a>.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_rt.html" title="r3_port_riscv::use_rt macro">use_rt</a></td><td class="docblock-short"><p>Generate entry points using [<code>::riscv_rt</code>]. <strong>Requires <a href="../r3_port_riscv/trait.EntryPoint.html"><code>EntryPoint</code></a> to
+be implemented.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_timer.html" title="r3_port_riscv::use_timer macro">use_timer</a></td><td class="docblock-short"><p>Attach the implementation of <a href="../r3/kernel/trait.PortTimer.html"><code>PortTimer</code></a> that is based on the RISC-V timer
+(<code>mtime</code>/<code>mtimecfg</code>) to a given system type. This macro also implements
+<a href="../r3_port_riscv/trait.Timer.html"><code>Timer</code></a> on the system type.
+<strong>Requires <a href="../r3_port_riscv/trait.TimerOptions.html" title="TimerOptions"><code>TimerOptions</code></a>.</strong></p>
+</td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_EXTERNAL.html" title="r3_port_riscv::INTERRUPT_EXTERNAL constant">INTERRUPT_EXTERNAL</a></td><td class="docblock-short"><p>The interrupt number for external interrupts.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_PLATFORM_START.html" title="r3_port_riscv::INTERRUPT_PLATFORM_START constant">INTERRUPT_PLATFORM_START</a></td><td class="docblock-short"><p>The first interrupt numbers allocated for use by an interrupt controller
+driver.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_SOFTWARE.html" title="r3_port_riscv::INTERRUPT_SOFTWARE constant">INTERRUPT_SOFTWARE</a></td><td class="docblock-short"><p>The interrupt number for software interrupts.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_TIMER.html" title="r3_port_riscv::INTERRUPT_TIMER constant">INTERRUPT_TIMER</a></td><td class="docblock-short"><p>The interrupt number for timer interrupts.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.EntryPoint.html" title="r3_port_riscv::EntryPoint trait">EntryPoint</a></td><td class="docblock-short"><p>Defines the entry points of a port instantiation. Implemented by
+<a href="../r3_port_riscv/macro.use_port.html" title="use_port!"><code>use_port!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.InterruptController.html" title="r3_port_riscv::InterruptController trait">InterruptController</a></td><td class="docblock-short"><p>An abstract interface to an interrupt controller. Implemented by
+<a href="../r3_port_riscv/macro.use_plic.html" title="use_plic!"><code>use_plic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Plic.html" title="r3_port_riscv::Plic trait">Plic</a></td><td class="docblock-short"><p>Provides access to a system-global PLIC instance. Implemented by <a href="../r3_port_riscv/macro.use_plic.html" title="use_plic!"><code>use_plic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.PlicOptions.html" title="r3_port_riscv::PlicOptions trait">PlicOptions</a></td><td class="docblock-short"><p>The options for <a href="../r3_port_riscv/macro.use_plic.html" title="use_plic!"><code>use_plic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.ThreadingOptions.html" title="r3_port_riscv::ThreadingOptions trait">ThreadingOptions</a></td><td class="docblock-short"><p>The configuration of the port.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Timer.html" title="r3_port_riscv::Timer trait">Timer</a></td><td class="docblock-short"><p>An abstract inferface to a port timer driver. Implemented by
+<a href="../r3_port_riscv/macro.use_timer.html" title="use_timer!"><code>use_timer!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.TimerOptions.html" title="r3_port_riscv::TimerOptions trait">TimerOptions</a></td><td class="docblock-short"><p>The options for <a href="../r3_port_riscv/macro.use_timer.html" title="use_timer!"><code>use_timer!</code></a>.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="r3_port_riscv" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

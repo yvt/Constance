@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PERFSEL0_W","Write proxy for field `PERFSEL0`"]],"type":[["PERFSEL0_R","Reader of field `PERFSEL0`"],["R","Reader of register PERFSEL0"],["W","Writer for register PERFSEL0"]]});

@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="An SVG composer and parser."><meta name="keywords" content="rust, rustlang, rust-lang, svg"><title>svg - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../svg/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate svg</p><div class="block version"><p>Version 0.5.12</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all svg's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="svg" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">svg</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/svg/lib.rs.html#1-170" title="goto source code">[src]</a></span></h1><div class="docblock"><p>An SVG composer and parser.</p>
+<h2 id="example-composing" class="section-header"><a href="#example-composing">Example: Composing</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">Document</span>;
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">node</span>::<span class="ident">element</span>::<span class="ident">Path</span>;
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">node</span>::<span class="ident">element</span>::<span class="ident">path</span>::<span class="ident">Data</span>;
+
+<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Data</span>::<span class="ident">new</span>()
+    .<span class="ident">move_to</span>((<span class="number">10</span>, <span class="number">10</span>))
+    .<span class="ident">line_by</span>((<span class="number">0</span>, <span class="number">50</span>))
+    .<span class="ident">line_by</span>((<span class="number">50</span>, <span class="number">0</span>))
+    .<span class="ident">line_by</span>((<span class="number">0</span>, <span class="op">-</span><span class="number">50</span>))
+    .<span class="ident">close</span>();
+
+<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">Path</span>::<span class="ident">new</span>()
+    .<span class="ident">set</span>(<span class="string">&quot;fill&quot;</span>, <span class="string">&quot;none&quot;</span>)
+    .<span class="ident">set</span>(<span class="string">&quot;stroke&quot;</span>, <span class="string">&quot;black&quot;</span>)
+    .<span class="ident">set</span>(<span class="string">&quot;stroke-width&quot;</span>, <span class="number">3</span>)
+    .<span class="ident">set</span>(<span class="string">&quot;d&quot;</span>, <span class="ident">data</span>);
+
+<span class="kw">let</span> <span class="ident">document</span> <span class="op">=</span> <span class="ident">Document</span>::<span class="ident">new</span>()
+    .<span class="ident">set</span>(<span class="string">&quot;viewBox&quot;</span>, (<span class="number">0</span>, <span class="number">0</span>, <span class="number">70</span>, <span class="number">70</span>))
+    .<span class="ident">add</span>(<span class="ident">path</span>);
+
+<span class="ident">svg</span>::<span class="ident">save</span>(<span class="string">&quot;image.svg&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">document</span>).<span class="ident">unwrap</span>();</pre></div>
+<h2 id="example-parsing" class="section-header"><a href="#example-parsing">Example: Parsing</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">node</span>::<span class="ident">element</span>::<span class="ident">path</span>::{<span class="ident">Command</span>, <span class="ident">Data</span>};
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">node</span>::<span class="ident">element</span>::<span class="ident">tag</span>::<span class="ident">Path</span>;
+<span class="kw">use</span> <span class="ident">svg</span>::<span class="ident">parser</span>::<span class="ident">Event</span>;
+
+<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;image.svg&quot;</span>;
+<span class="kw">for</span> <span class="ident">event</span> <span class="kw">in</span> <span class="ident">svg</span>::<span class="ident">open</span>(<span class="ident">path</span>).<span class="ident">unwrap</span>() {
+    <span class="kw">match</span> <span class="ident">event</span> {
+        <span class="ident">Event</span>::<span class="ident">Tag</span>(<span class="ident">Path</span>, <span class="kw">_</span>, <span class="ident">attributes</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">attributes</span>.<span class="ident">get</span>(<span class="string">&quot;d&quot;</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Data</span>::<span class="ident">parse</span>(<span class="ident">data</span>).<span class="ident">unwrap</span>();
+            <span class="kw">for</span> <span class="ident">command</span> <span class="kw">in</span> <span class="ident">data</span>.<span class="ident">iter</span>() {
+                <span class="kw">match</span> <span class="ident">command</span> {
+                    <span class="kw-2">&amp;</span><span class="ident">Command</span>::<span class="ident">Move</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Move!&quot;</span>),
+                    <span class="kw-2">&amp;</span><span class="ident">Command</span>::<span class="ident">Line</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Line!&quot;</span>),
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                }
+            }
+        }
+        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+    }
+}</pre></div>
+</div><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use node::<a class="trait" href="../svg/node/trait.Node.html" title="trait svg::node::Node">Node</a>;</code></td></tr><tr><td><code>pub use parser::<a class="struct" href="../svg/parser/struct.Parser.html" title="struct svg::parser::Parser">Parser</a>;</code></td></tr></table><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="node/index.html" title="svg::node mod">node</a></td><td class="docblock-short"><p>The nodes.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="parser/index.html" title="svg::parser mod">parser</a></td><td class="docblock-short"><p>The parser.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.open.html" title="svg::open fn">open</a></td><td class="docblock-short"><p>Open a document.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.read.html" title="svg::read fn">read</a></td><td class="docblock-short"><p>Read a document.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.save.html" title="svg::save fn">save</a></td><td class="docblock-short"><p>Save a document.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.write.html" title="svg::write fn">write</a></td><td class="docblock-short"><p>Write a document.</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.Document.html" title="svg::Document type">Document</a></td><td class="docblock-short"><p>A document.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="svg" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

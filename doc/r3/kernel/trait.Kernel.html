@@ -1,0 +1,323 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Provides access to the global API functions exposed by the kernel."><meta name="keywords" content="rust, rustlang, rust-lang, Kernel"><title>r3::kernel::Kernel - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc trait"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../r3/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Trait Kernel</p><div class="sidebar-elems"><div class="block items"><a class="sidebar-title" href="#associated-types">Associated Types</a><div class="sidebar-links"><a href="#associatedtype.DebugPrinter">DebugPrinter</a></div><a class="sidebar-title" href="#required-methods">Required Methods</a><div class="sidebar-links"><a href="#tymethod.debug">debug</a><a href="#tymethod.time">time</a><a href="#tymethod.acquire_cpu_lock">acquire_cpu_lock</a><a href="#tymethod.release_cpu_lock">release_cpu_lock</a><a href="#tymethod.has_cpu_lock">has_cpu_lock</a><a href="#tymethod.boost_priority">boost_priority</a><a href="#tymethod.unboost_priority">unboost_priority</a><a href="#tymethod.is_priority_boost_active">is_priority_boost_active</a><a href="#tymethod.set_time">set_time</a><a href="#tymethod.adjust_time">adjust_time</a><a href="#tymethod.exit_task">exit_task</a><a href="#tymethod.park">park</a><a href="#tymethod.park_timeout">park_timeout</a><a href="#tymethod.sleep">sleep</a></div><a class="sidebar-title" href="#implementors">Implementors</a></div><p class="location"><a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a></p><div id="sidebar-vars" data-name="Kernel" data-ty="trait" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Trait <a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a>::<wbr><a class="trait" href="">Kernel</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/r3/kernel.rs.html#39-277" title="goto source code">[src]</a></span></h1><div class="docblock type-decl hidden-by-usual-hider"><pre class="rust trait">pub trait Kernel: <a class="trait" href="../../r3/kernel/trait.Port.html" title="trait r3::kernel::Port">Port</a> + <a class="trait" href="../../r3/kernel/trait.KernelCfg2.html" title="trait r3::kernel::KernelCfg2">KernelCfg2</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + 'static {
+    type <a href="#associatedtype.DebugPrinter" class="type">DebugPrinter</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a>;
+    fn <a href="#tymethod.debug" class="fnname">debug</a>() -&gt; Self::<a class="type" href="../../r3/kernel/trait.Kernel.html#associatedtype.DebugPrinter" title="type r3::kernel::Kernel::DebugPrinter">DebugPrinter</a>;
+<div class="item-spacer"></div>    fn <a href="#tymethod.acquire_cpu_lock" class="fnname">acquire_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;;
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.release_cpu_lock" class="fnname">release_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.has_cpu_lock" class="fnname">has_cpu_lock</a>() -&gt; bool;
+<div class="item-spacer"></div>    fn <a href="#tymethod.boost_priority" class="fnname">boost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;;
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.unboost_priority" class="fnname">unboost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.is_priority_boost_active" class="fnname">is_priority_boost_active</a>() -&gt; bool;
+<div class="item-spacer"></div>    fn <a href="#tymethod.time" class="fnname">time</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>, <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.set_time" class="fnname">set_time</a>(time: <a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.adjust_time" class="fnname">adjust_time</a>(delta: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.AdjustTimeError.html" title="enum r3::kernel::AdjustTimeError">AdjustTimeError</a>&gt;;
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.exit_task" class="fnname">exit_task</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;!, <a class="enum" href="../../r3/kernel/enum.ExitTaskError.html" title="enum r3::kernel::ExitTaskError">ExitTaskError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.park" class="fnname">park</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkError.html" title="enum r3::kernel::ParkError">ParkError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.park_timeout" class="fnname">park_timeout</a>(timeout: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkTimeoutError.html" title="enum r3::kernel::ParkTimeoutError">ParkTimeoutError</a>&gt;;
+<div class="item-spacer"></div>    fn <a href="#tymethod.sleep" class="fnname">sleep</a>(duration: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.SleepError.html" title="enum r3::kernel::SleepError">SleepError</a>&gt;;
+}</pre></div><div class="docblock"><p>Provides access to the global API functions exposed by the kernel.</p>
+<p>This trait is automatically implemented on “system” types that have
+sufficient trait <code>impl</code>s to instantiate the kernel.</p>
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script></div><h2 id="associated-types" class="small-section-header">Associated Types<a href="#associated-types" class="anchor"></a></h2><div class="methods"><h3 id="associatedtype.DebugPrinter" class="method"><code>type <a href="#associatedtype.DebugPrinter" class="type">DebugPrinter</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a></code><a class="srclink" href="../../src/r3/kernel.rs.html#40" title="goto source code">[src]</a></h3></div><span class="loading-content">Loading content...</span><h2 id="required-methods" class="small-section-header">Required methods<a href="#required-methods" class="anchor"></a></h2><div class="methods"><h3 id="tymethod.debug" class="method"><code>fn <a href="#tymethod.debug" class="fnname">debug</a>() -&gt; Self::<a class="type" href="../../r3/kernel/trait.Kernel.html#associatedtype.DebugPrinter" title="type r3::kernel::Kernel::DebugPrinter">DebugPrinter</a></code><a class="srclink" href="../../src/r3/kernel.rs.html#47" title="goto source code">[src]</a></h3><div class="docblock"><p>Get an object that implements <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html"><code>Debug</code></a> for dumping the
+current kernel state.</p>
+<p>Note that printing this object might consume a large amount of stack
+space.</p>
+</div><h3 id="tymethod.acquire_cpu_lock" class="method"><code>fn <a href="#tymethod.acquire_cpu_lock" class="fnname">acquire_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#55" title="goto source code">[src]</a></h3><div class="docblock"><p>Activate <a href="../../r3/index.html#system-states">CPU Lock</a>.</p>
+<p>Returns <a href="../../r3/kernel/enum.CpuLockError.html#variant.BadContext"><code>BadContext</code></a> if CPU Lock is already active.</p>
+</div><h3 id="tymethod.release_cpu_lock" class="method"><code>unsafe fn <a href="#tymethod.release_cpu_lock" class="fnname">release_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#71" title="goto source code">[src]</a></h3><div class="docblock"><p>Deactivate <a href="../../r3/index.html#system-states">CPU Lock</a>.</p>
+<p>Returns <a href="../../r3/kernel/enum.CpuLockError.html#variant.BadContext"><code>BadContext</code></a> if CPU Lock is already inactive.</p>
+<h1 id="safety" class="section-header"><a href="#safety">Safety</a></h1>
+<p>CPU Lock is useful for creating a critical section. By making this
+method <code>unsafe</code>, safe code is prevented from interfering with a critical
+section.</p>
+<p>Deactivating CPU Lock in a boot context is disallowed.</p>
+</div><h3 id="tymethod.has_cpu_lock" class="method"><code>fn <a href="#tymethod.has_cpu_lock" class="fnname">has_cpu_lock</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#74" title="goto source code">[src]</a></h3><div class="docblock"><p>Return a flag indicating whether CPU Lock is currently active.</p>
+</div><h3 id="tymethod.boost_priority" class="method"><code>fn <a href="#tymethod.boost_priority" class="fnname">boost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#85" title="goto source code">[src]</a></h3><div class="item-info"><div class="stab portability">This is supported on <strong>crate feature <code>priority_boost</code></strong> only.</div></div><div class="docblock"><p>Activate <a href="../../r3/index.html#system-states">Priority Boost</a>.</p>
+<p>Returns <a href="../../r3/kernel/enum.CpuLockError.html#variant.BadContext"><code>BadContext</code></a> if Priority Boost is already active, the
+calling context is not a task context, or CPU Lock is active.</p>
+</div><h3 id="tymethod.unboost_priority" class="method"><code>unsafe fn <a href="#tymethod.unboost_priority" class="fnname">unboost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#100" title="goto source code">[src]</a></h3><div class="docblock"><p>Deactivate <a href="../../r3/index.html#system-states">Priority Boost</a>.</p>
+<p>Returns <a href="../../r3/kernel/enum.CpuLockError.html#variant.BadContext"><code>BadContext</code></a> if Priority Boost is already inactive, the
+calling context is not a task context, or CPU Lock is active.</p>
+<h1 id="safety-1" class="section-header"><a href="#safety-1">Safety</a></h1>
+<p>Priority Boost is useful for creating a critical section. By making this
+method <code>unsafe</code>, safe code is prevented from interfering with a critical
+section.</p>
+</div><h3 id="tymethod.is_priority_boost_active" class="method"><code>fn <a href="#tymethod.is_priority_boost_active" class="fnname">is_priority_boost_active</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#105" title="goto source code">[src]</a></h3><div class="docblock"><p>Return a flag indicating whether <a href="../../r3/index.html#system-states">Priority Boost</a> is currently active.</p>
+</div><h3 id="tymethod.time" class="method"><code>fn <a href="#tymethod.time" class="fnname">time</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>, <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#121" title="goto source code">[src]</a></h3><div class="item-info"><div class="stab portability">This is supported on <strong>crate feature <code>system_time</code></strong> only.</div></div><div class="docblock"><p>Get the current <a href="../../r3/index.html#kernel-timing">system time</a>.</p>
+<p>This method will return <a href="../../r3/kernel/enum.TimeError.html#variant.BadContext" title="TimeError::BadContext"><code>TimeError::BadContext</code></a> when called in a
+non-task context.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Rationale:</strong> This restriction originates from μITRON4.0. It’s
+actually unnecessary in the current implementation, but allows
+headroom for potential changes in the implementation.</p>
+</blockquote>
+</div><h3 id="tymethod.set_time" class="method"><code>fn <a href="#tymethod.set_time" class="fnname">set_time</a>(time: <a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#140" title="goto source code">[src]</a></h3><div class="docblock"><p>Set the current <a href="../../r3/index.html#kernel-timing">system time</a>.</p>
+<p>This method <em>does not change</em> the relative arrival times of outstanding
+timed events nor the relative time of the frontier (a concept used in
+the definition of <a href="../../r3/kernel/trait.Kernel.html#tymethod.adjust_time"><code>adjust_time</code></a>).</p>
+<p>This method will return <a href="../../r3/kernel/enum.TimeError.html#variant.BadContext" title="TimeError::BadContext"><code>TimeError::BadContext</code></a> when called in a
+non-task context.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Rationale:</strong> This restriction originates from μITRON4.0. It’s
+actually unnecessary in the current implementation, but allows
+headroom for potential changes in the implementation.</p>
+</blockquote>
+</div><h3 id="tymethod.adjust_time" class="method"><code>fn <a href="#tymethod.adjust_time" class="fnname">adjust_time</a>(delta: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.AdjustTimeError.html" title="enum r3::kernel::AdjustTimeError">AdjustTimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#236" title="goto source code">[src]</a></h3><div class="docblock"><p>Move the current <a href="../../r3/index.html#kernel-timing">system time</a> forward or backward by the specified
+amount.</p>
+<p>This method <em>changes</em> the relative arrival times of outstanding
+timed events.</p>
+<p>The kernel uses a limited number of bits to represent the arrival times
+of outstanding timed events. This means that there’s some upper bound
+on how far the system time can be moved away without breaking internal
+invariants. This method ensures this bound is not violated by the
+methods described below. This method will return <code>BadObjectState</code> if
+this check fails.</p>
+<p><strong>Moving Forward (<code>delta &gt; 0</code>):</strong> If there are no outstanding time
+events, adjustment in this direction is unbounded. Otherwise, let
+<code>t</code> be the relative arrival time (in relation to the current time) of
+the earliest outstanding time event.
+If <code>t - delta &lt; -</code><a href="../../r3/kernel/constant.TIME_USER_HEADROOM.html" title="TIME_USER_HEADROOM"><code>TIME_USER_HEADROOM</code></a> (i.e., if the adjustment would
+make the event overdue by more than <code>TIME_USER_HEADROOM</code>), the check
+will fail.</p>
+<p>The events made overdue by the call will be processed when the port
+timer driver announces a new tick. It’s unspecified whether this happens
+before or after the call returns.</p>
+<p><strong>Moving Backward (<code>delta &lt; 0</code>):</strong> First, we introduce the concept of
+<strong>a frontier</strong>. The frontier represents the point of time at which the
+system time advanced the most. Usually, the frontier is identical to
+the current system time because the system time keeps moving forward
+(a). However, adjusting the system time to past makes them temporarily
+separate from each other (b). In this case, the frontier stays in place
+until the system time eventually catches up with the frontier and they
+start moving together again (c).</p>
+<center>
+<p><img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iYm9iIiBmb250LWZhbWlseT0iJ1NvdXJjZSBDb2RlIFBybycsJ0FuZGFsZSBNb25vJywnU2Vnb2UgVUkgTW9ubycsJ0RlamF2dSBTYW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNCIgaGVpZ2h0PSIyNDAiIHdpZHRoPSI1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bWFya2VyIGlkPSJ0cmlhbmdsZSIgbWFya2VySGVpZ2h0PSI4IiBtYXJrZXJXaWR0aD0iOCIgb3JpZW50PSJhdXRvIiByZWZYPSI0IiByZWZZPSIyIiB2aWV3Qm94PSIwIDAgOCA0Ij4KPHBvbHlnb24gY2xhc3M9ImZnX2ZpbGwiIHBvaW50cz0iMCwwIDAsNCA4LDIgMCwwIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjbGVhcl90cmlhbmdsZSIgbWFya2VySGVpZ2h0PSIxMCIgbWFya2VyV2lkdGg9IjEwIiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEiIHJlZlk9IjciIHZpZXdCb3g9IjAgMCAyMCAxNCI+Cjxwb2x5Z29uIGNsYXNzPSJiZ19maWxsIiBwb2ludHM9IjIsMiAyLDEyIDE4LDcgMiwyIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjaXJjbGUiIG1hcmtlckhlaWdodD0iNSIgbWFya2VyV2lkdGg9IjUiIG9yaWVudD0iYXV0byIgcmVmWD0iMTAiIHJlZlk9IjEwIiB2aWV3Qm94PSIwIDAgMjAgMjAiPgo8Y2lyY2xlIGNsYXNzPSJmZ19maWxsIiBjeD0iMTAiIGN5PSIxMCIgcj0iOCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ic3F1YXJlIiBtYXJrZXJIZWlnaHQ9IjUiIG1hcmtlcldpZHRoPSI1IiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEwIiByZWZZPSIxMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KPHJlY3QgY2xhc3M9ImZnX2ZpbGwiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgeD0iMCIgeT0iMCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ib3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMTAiIG1hcmtlcldpZHRoPSIxMCIgb3JpZW50PSJhdXRvIiByZWZYPSIxMCIgcmVmWT0iMTAiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIxMCIgY3k9IjEwIiByPSI0Ii8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJiaWdfb3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMjAiIG1hcmtlcldpZHRoPSIyMCIgb3JpZW50PSJhdXRvIiByZWZYPSIyMCIgcmVmWT0iMjAiIHZpZXdCb3g9IjAgMCA0MCA0MCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIyMCIgY3k9IjIwIiByPSI2Ii8+CjwvbWFya2VyPgo8L2RlZnM+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgpyZWN0LmJhY2tkcm9wIHsKICAgIGZpbGw6IHdoaXRlOwp9CnRleHR7CiAgICBmaWxsOiBibGFjazsKfQoKY2lyY2xlIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9CgpsaW5lIHsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCnBhdGggewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCmxpbmUuZGFzaGVkIHsKICAgIHN0cm9rZS1kYXNoYXJyYXk6IDU7Cn0KCi5mZ19maWxsIHsKICAgIGZpbGw6IGJsYWNrOwp9CgoKLmJnX2ZpbGwgewogICAgZmlsbDogd2hpdGU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9Cgp0c3Bhbi5oZWFkewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKfQogICAgCjwvc3R5bGU+CjxyZWN0IGNsYXNzPSJiYWNrZHJvcCIgaGVpZ2h0PSIyNDAiIHdpZHRoPSI1MTIiIHg9IjAiIHk9IjAiLz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjY2lyY2xlKSIgeDE9IjAiIHgyPSI4NCIgeTE9IjEzNiIgeTI9IjEzNiIvPgo8bGluZSBtYXJrZXItc3RhcnQ9InVybCgjY2lyY2xlKSIgeDE9Ijg0IiB4Mj0iMTg0IiB5MT0iMTM2IiB5Mj0iMTM2Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjY2lyY2xlKSIgeDE9IjI4MCIgeDI9IjMxNiIgeTE9IjI0IiB5Mj0iMjQiLz4KPGxpbmUgbWFya2VyLXN0YXJ0PSJ1cmwoI2NpcmNsZSkiIHgxPSIzMTYiIHgyPSI1MTIiIHkxPSIyNCIgeTI9IjI0Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjY2lyY2xlKSIgeDE9IjI4MCIgeDI9IjM0OCIgeTE9IjEwNCIgeTI9IjEwNCIvPgo8bGluZSBtYXJrZXItc3RhcnQ9InVybCgjY2lyY2xlKSIgeDE9IjM0OCIgeDI9IjUxMiIgeTE9IjEwNCIgeTI9IjEwNCIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI2NpcmNsZSkiIHgxPSIyODAiIHgyPSIzODAiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPGxpbmUgbWFya2VyLXN0YXJ0PSJ1cmwoI2NpcmNsZSkiIHgxPSIzODAiIHgyPSI1MTIiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCNjaXJjbGUpIiB4MT0iMjgwIiB4Mj0iNDIwIiB5MT0iMTY4IiB5Mj0iMTY4Ii8+CjxsaW5lIG1hcmtlci1zdGFydD0idXJsKCNjaXJjbGUpIiB4MT0iNDIwIiB4Mj0iNTEyIiB5MT0iMTY4IiB5Mj0iMTY4Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjY2lyY2xlKSIgeDE9IjI4MCIgeDI9IjQ2MCIgeTE9IjIwMCIgeTI9IjIwMCIvPgo8bGluZSBtYXJrZXItc3RhcnQ9InVybCgjY2lyY2xlKSIgeDE9IjQ2MCIgeDI9IjUxMiIgeTE9IjIwMCIgeTI9IjIwMCIvPgo8L2c+CjxnPgo8dGV4dCB4PSI0OSIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSI0OCI+CnN5c3RlbQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjczIiB5PSIxODgiIHRleHRMZW5ndGg9IjI0Ij4KKGEpCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iODEiIHk9IjE1NiIgdGV4dExlbmd0aD0iOCI+Cl4KPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI5NyIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI2NCI+CmZyb250aWVyCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMTA1IiB5PSIxMjQiIHRleHRMZW5ndGg9IjMyIj4KdGltZQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI3MyIgeT0iMTIiIHRleHRMZW5ndGg9IjQ4Ij4Kc3lzdGVtCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMzI5IiB5PSIxMiIgdGV4dExlbmd0aD0iMzIiPgp0aW1lCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMzc3IiB5PSI3NiIgdGV4dExlbmd0aD0iMjQiPgooYikKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIzNzciIHk9IjIzNiIgdGV4dExlbmd0aD0iMjQiPgooYykKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI0MTciIHk9IjQ0IiB0ZXh0TGVuZ3RoPSI4Ij4KXgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQxNyIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSI4Ij4KXgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQxNyIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI4Ij4KXgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQxNyIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSI4Ij4KXgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQzMyIgeT0iNDQiIHRleHRMZW5ndGg9IjY0Ij4KZnJvbnRpZXIKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI0NTciIHk9IjIyMCIgdGV4dExlbmd0aD0iOCI+Cl4KPC90ZXh0Pgo8L2c+Cjwvc3ZnPg==" alt="" /></p>
+</center>
+<p>Let <code>frontier</code> be the current relative time of the frontier (in relation
+to the current time). If <code>frontier - delta &gt; </code><a href="../../r3/kernel/constant.TIME_USER_HEADROOM.html" title="TIME_USER_HEADROOM"><code>TIME_USER_HEADROOM</code></a>
+(i.e., if the adjustment would move the frontier too far away), the
+check will fail.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Observation:</strong> Even under ideal circumstances, all timed events are
+bound to be overdue by a very small extent because of various factors
+such as an intrinsic interrupt latency, insufficient timer resolution,
+and uses of CPU Lock. This means the minimum value of <code>t</code> in the above
+explanation is not <code>0</code> but a somewhat smaller value. The consequence
+is that <code>delta</code> can never reliably be <code>&gt;= TIME_USER_HEADROOM</code>.</p>
+</blockquote>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Relation to Other Specifications:</strong> <code>adj_tim</code> from
+<a href="https://www.toppers.jp/index.html">the TOPPERS 3rd generation kernels</a></p>
+</blockquote>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Rationale:</strong> When moving the system time forward, capping by a
+frontier instead of an actual latest arrival time has advantages over
+other schemes that involve tracking the latest arrival time:</p>
+<ul>
+<li>
+<p>Linear-scanning all outstanding timed events to find the latest
+arrival time would take a linear time.</p>
+</li>
+<li>
+<p>Using a double-ended data structure for an event queue, such as a
+balanced search tree and double heaps, would increase the runtime
+cost of maintaining the structure.</p>
+</li>
+</ul>
+<p>Also, the gap between the current time and the frontier is completely
+in control of the code that calls <code>adjust_time</code>, making the behavior
+more predictable.</p>
+</blockquote>
+</div><h3 id="tymethod.exit_task" class="method"><code>unsafe fn <a href="#tymethod.exit_task" class="fnname">exit_task</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;!, <a class="enum" href="../../r3/kernel/enum.ExitTaskError.html" title="enum r3::kernel::ExitTaskError">ExitTaskError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#253" title="goto source code">[src]</a></h3><div class="docblock"><p>Terminate the current task, putting it into the Dormant state.</p>
+<p>The kernel (to be precise, the port) makes an implicit call to this
+function when a task entry point function returns.</p>
+<h1 id="safety-2" class="section-header"><a href="#safety-2">Safety</a></h1>
+<p>On a successful call, this function destroys the current task’s stack
+without running any destructors on stack-allocated objects and renders
+all references pointing to such objects invalid. The caller is
+responsible for taking this possibility into account and ensuring this
+doesn’t lead to an undefined behavior.</p>
+</div><h3 id="tymethod.park" class="method"><code>fn <a href="#tymethod.park" class="fnname">park</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkError.html" title="enum r3::kernel::ParkError">ParkError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#265" title="goto source code">[src]</a></h3><div class="docblock"><p>Put the current task into the Waiting state until the task’s token is
+made available by <a href="../../r3/kernel/struct.Task.html#method.unpark" title="Task::unpark"><code>Task::unpark</code></a>. The token is initially absent when
+the task is activated.</p>
+<p>The token will be consumed when this method returns successfully.</p>
+<p>This system service may block. Therefore, calling this method is not
+allowed in <a href="../../r3/index.html#contexts">a non-waitable context</a> and will return <code>Err(BadContext)</code>.</p>
+</div><h3 id="tymethod.park_timeout" class="method"><code>fn <a href="#tymethod.park_timeout" class="fnname">park_timeout</a>(timeout: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkTimeoutError.html" title="enum r3::kernel::ParkTimeoutError">ParkTimeoutError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#273" title="goto source code">[src]</a></h3><div class="docblock"><p><a href="../../r3/kernel/trait.Kernel.html#tymethod.park"><code>park</code></a> with timeout.</p>
+<p>This system service may block. Therefore, calling this method is not
+allowed in <a href="../../r3/index.html#contexts">a non-waitable context</a> and will return <code>Err(BadContext)</code>.</p>
+</div><h3 id="tymethod.sleep" class="method"><code>fn <a href="#tymethod.sleep" class="fnname">sleep</a>(duration: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.SleepError.html" title="enum r3::kernel::SleepError">SleepError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#276" title="goto source code">[src]</a></h3><div class="docblock"><p>Block the current task for the specified duration.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"><h3 id="impl-Kernel" class="impl"><code class="in-band">impl&lt;T:&nbsp;<a class="trait" href="../../r3/kernel/trait.Port.html" title="trait r3::kernel::Port">Port</a> + <a class="trait" href="../../r3/kernel/trait.KernelCfg2.html" title="trait r3::kernel::KernelCfg2">KernelCfg2</a> + 'static&gt; <a class="trait" href="../../r3/kernel/trait.Kernel.html" title="trait r3::kernel::Kernel">Kernel</a> for T</code><a href="#impl-Kernel" class="anchor"></a><a class="srclink" href="../../src/r3/kernel.rs.html#279-375" title="goto source code">[src]</a></h3><div class="impl-items"><h4 id="method.acquire_cpu_lock" class="method hidden"><code>fn <a href="#method.acquire_cpu_lock" class="fnname">acquire_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#281-289" title="goto source code">[src]</a></h4><h4 id="method.release_cpu_lock" class="method hidden"><code>unsafe fn <a href="#method.release_cpu_lock" class="fnname">release_cpu_lock</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.CpuLockError.html" title="enum r3::kernel::CpuLockError">CpuLockError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#292-300" title="goto source code">[src]</a></h4><h4 id="method.has_cpu_lock" class="method hidden"><code>fn <a href="#method.has_cpu_lock" class="fnname">has_cpu_lock</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#303-305" title="goto source code">[src]</a></h4><h4 id="method.boost_priority" class="method hidden"><code>fn <a href="#method.boost_priority" class="fnname">boost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#309-311" title="goto source code">[src]</a></h4><div class="item-info hidden"><div class="stab portability">This is supported on <strong>crate feature <code>priority_boost</code></strong> only.</div></div><h4 id="method.unboost_priority" class="method hidden"><code>unsafe fn <a href="#method.unboost_priority" class="fnname">unboost_priority</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.BoostPriorityError.html" title="enum r3::kernel::BoostPriorityError">BoostPriorityError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#314-316" title="goto source code">[src]</a></h4><h4 id="method.is_priority_boost_active" class="method hidden"><code>fn <a href="#method.is_priority_boost_active" class="fnname">is_priority_boost_active</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#320-322" title="goto source code">[src]</a></h4><h4 id="method.time" class="method hidden"><code>fn <a href="#method.time" class="fnname">time</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>, <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#332-334" title="goto source code">[src]</a></h4><div class="item-info hidden"><div class="stab portability">This is supported on <strong>crate feature <code>system_time</code></strong> only.</div></div><h4 id="method.set_time" class="method hidden"><code>fn <a href="#method.set_time" class="fnname">set_time</a>(time: <a class="struct" href="../../r3/time/struct.Time.html" title="struct r3::time::Time">Time</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.TimeError.html" title="enum r3::kernel::TimeError">TimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#336-338" title="goto source code">[src]</a></h4><h4 id="method.adjust_time" class="method hidden"><code>fn <a href="#method.adjust_time" class="fnname">adjust_time</a>(delta: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.AdjustTimeError.html" title="enum r3::kernel::AdjustTimeError">AdjustTimeError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#340-342" title="goto source code">[src]</a></h4><h4 id="method.exit_task" class="method hidden"><code>unsafe fn <a href="#method.exit_task" class="fnname">exit_task</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;!, <a class="enum" href="../../r3/kernel/enum.ExitTaskError.html" title="enum r3::kernel::ExitTaskError">ExitTaskError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#345-348" title="goto source code">[src]</a></h4><h4 id="method.park" class="method hidden"><code>fn <a href="#method.park" class="fnname">park</a>() -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkError.html" title="enum r3::kernel::ParkError">ParkError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#351-353" title="goto source code">[src]</a></h4><h4 id="method.park_timeout" class="method hidden"><code>fn <a href="#method.park_timeout" class="fnname">park_timeout</a>(timeout: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ParkTimeoutError.html" title="enum r3::kernel::ParkTimeoutError">ParkTimeoutError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#356-358" title="goto source code">[src]</a></h4><h4 id="method.sleep" class="method hidden"><code>fn <a href="#method.sleep" class="fnname">sleep</a>(timeout: <a class="struct" href="../../r3/time/struct.Duration.html" title="struct r3::time::Duration">Duration</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.SleepError.html" title="enum r3::kernel::SleepError">SleepError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#360-362" title="goto source code">[src]</a></h4><h4 id="associatedtype.DebugPrinter-1" class="type"><code>type <a href="#associatedtype.DebugPrinter-1" class="type">DebugPrinter</a> = <a class="struct" href="../../r3/kernel/struct.KernelDebugPrinter.html" title="struct r3::kernel::KernelDebugPrinter">KernelDebugPrinter</a>&lt;Self&gt;</code></h4><h4 id="method.debug" class="method"><code>fn <a href="#method.debug" class="fnname">debug</a>() -&gt; Self::<a class="type" href="../../r3/kernel/trait.Kernel.html#associatedtype.DebugPrinter" title="type r3::kernel::Kernel::DebugPrinter">DebugPrinter</a></code><a class="srclink" href="../../src/r3/kernel.rs.html#372-374" title="goto source code">[src]</a></h4><div class="docblock"><p>Get an object that implements <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html"><code>Debug</code></a> for dumping the
+current kernel state.</p>
+<p>Note that printing this object might consume a large amount of stack
+space.</p>
+</div></div></div><span class="loading-content">Loading content...</span><script type="text/javascript" src="../../implementors/r3/kernel/trait.Kernel.js" async></script></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="r3" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script></body></html>

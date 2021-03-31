@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Command","A command of a data attribute."],["Position","A positioning method."]],"struct":[["Data","A data attribute."],["Parameters","Parameters of a command."]],"type":[["Number","A number."]]});

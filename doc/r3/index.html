@@ -1,0 +1,718 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="R3 is a proof-of-concept of a static RTOS that utilizes Rust’s compile-time function evaluation mechanism for static configuration (creation of kernel objects and memory allocation)."><meta name="keywords" content="rust, rustlang, rust-lang, r3"><title>r3 - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../r3/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate r3</p><div class="block version"><p>Version 0.1.1</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all r3's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="r3" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">r3</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/r3/lib.rs.html#1-77" title="goto source code">[src]</a></span></h1><div class="docblock"><h1 align="center" style="border: none">
+<img src="https://img.shields.io/badge/-𝖱𝟥-222?style=for-the-badge&labelColor=111111" height="100" alt="R3" style="background: #222"><br><img src="https://img.shields.io/badge/-𝖱𝖤𝖠𝖫--𝖳𝖨𝖬𝖤%20𝖮𝖯𝖤𝖱𝖠𝖳𝖨𝖭𝖦%20𝖲𝖸𝖲𝖳𝖤𝖬-eee?style=for-the-badge&labelColor=333333" alt="Real-Time Operating System" style="background: #eee">
+</h1>
+<style type="text/css">
+body.theme-ayu h1 img:nth-of-type(1) { filter: sepia(90%) hue-rotate(180deg); }
+body.theme-dark h1 img:nth-of-type(2) { filter: invert(85%); }
+body.theme-ayu h1 img:nth-of-type(2) { filter: contrast(2) invert(90%) sepia(50%) hue-rotate(180deg); }
+</style>
+<p>R3 is a proof-of-concept of a static RTOS that utilizes Rust’s compile-time function evaluation mechanism for static configuration (creation of kernel objects and memory allocation).</p>
+<ul>
+<li><strong>All kernel objects are defined statically</strong> for faster boot times, compile-time checking, predictable execution, reduced RAM consumption, no runtime allocation failures, and extra security.</li>
+<li>The kernel and its configurator <strong>don’t require an external build tool or a specialized procedural macro</strong>, maintaining transparency.</li>
+<li>The kernel is written in a target-independent way. The target-specific portion (called <em>a port</em>) is provided as a separate crate, which an application chooses and <strong>combines with the kernel using the trait system</strong>.</li>
+<li>Leverages Rust’s type safety for access control of kernel objects. Safe code can’t access an object that it doesn’t own.</li>
+</ul>
+<!-- Display a "some Cargo features are disabled" warning in the documentation so that the user can know some items are missing for that reason. But we don't want this message to be displayed when someone is viewing `lib.md` directly, so the actual message is rendered by CSS. -->
+<div class="admonition-follows"></div>
+<blockquote class="disabled-feature-warning"><p><span></span><code></code></p></blockquote>
+<div class="toc-header"></div>
+<ul>
+<li><a href="#note-to-application-developers">Note to Application Developers</a></li>
+<li><a href="#configuring-the-kernel">Configuring the Kernel</a>
+<ul>
+<li><a href="#trait-based-composition">Trait-based Composition</a></li>
+<li><a href="#static-configuration">Static Configuration</a></li>
+</ul>
+</li>
+<li><a href="#system-states">System States</a></li>
+<li><a href="#threads">Threads</a></li>
+<li><a href="#contexts">Contexts</a></li>
+<li><a href="#interrupt-handling-framework">Interrupt Handling Framework</a></li>
+<li><a href="#kernel-timing">Kernel Timing</a></li>
+<li><a href="#introspection">Introspection</a></li>
+<li><a href="#cargo-features">Cargo Features</a></li>
+<li><a href="#modules">Modules</a>  <!-- this section is generated by rustdoc --></li>
+<li><a href="#macros">Macros</a>  <!-- this section is generated by rustdoc --></li>
+</ul>
+<h1 id="note-to-application-developers" class="section-header"><a href="#note-to-application-developers">Note to Application Developers</a></h1>
+<p>The implementation code heavily relies on constant propagation, dead code elimination, and “zero-cost” abstractions. Without optimization, it might exhibit massive code bloat and excessive stack consumption. To change the optimization level for debug builds, add the following lines to your Cargo workspace’s <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[profile.dev]
+opt-level = 2
+</code></pre>
+<h1 id="configuring-the-kernel" class="section-header"><a href="#configuring-the-kernel">Configuring the Kernel</a></h1><h2 id="trait-based-composition" class="section-header"><a href="#trait-based-composition">Trait-based Composition</a></h2>
+<p>The R3 RTOS utilizes Rust’s trait system to allow system designers to construct a system in a modular way.</p>
+<p>An application crate uses the following macros to realize each part of the system:</p>
+<ul>
+<li>A port-provided macro like <strong><code>r3_xxx_port::use_port!</code></strong> (named in this way by convention) instantiates port-specfific items.</li>
+<li><strong><a href="../r3/macro.build.html"><code>r3::build!</code></a></strong> instantiates the kernel and kernel-private static data based on the kernel configuration supplied in the form of <strong><a href="#static-configuration">a configuration function</a></strong>.</li>
+</ul>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">r3_port_std</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="kw">struct</span> <span class="ident">Objects</span> { <span class="comment">/* ... */</span> }
+<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">configure_app</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CfgBuilder</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Objects</span> { <span class="comment">/* ... */</span> }
+
+<span class="kw">const</span> <span class="ident">COTTAGE</span>: <span class="ident">Objects</span> <span class="op">=</span> <span class="ident">r3</span>::<span class="macro">build</span><span class="macro">!</span>(<span class="ident">System</span>, <span class="ident">configure_app</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Objects</span>);</pre></div>
+<p>These macros generate various <code>impl</code>s interconnected under a complex relationship, with an ultimate goal of building a working system.</p>
+<p><span class="center"><img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iYm9iIiBmb250LWZhbWlseT0iJ1NvdXJjZSBDb2RlIFBybycsJ0FuZGFsZSBNb25vJywnU2Vnb2UgVUkgTW9ubycsJ0RlamF2dSBTYW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNCIgaGVpZ2h0PSI1MTIiIHdpZHRoPSI1NzYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bWFya2VyIGlkPSJ0cmlhbmdsZSIgbWFya2VySGVpZ2h0PSI4IiBtYXJrZXJXaWR0aD0iOCIgb3JpZW50PSJhdXRvIiByZWZYPSI0IiByZWZZPSIyIiB2aWV3Qm94PSIwIDAgOCA0Ij4KPHBvbHlnb24gY2xhc3M9ImZnX2ZpbGwiIHBvaW50cz0iMCwwIDAsNCA4LDIgMCwwIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjbGVhcl90cmlhbmdsZSIgbWFya2VySGVpZ2h0PSIxMCIgbWFya2VyV2lkdGg9IjEwIiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEiIHJlZlk9IjciIHZpZXdCb3g9IjAgMCAyMCAxNCI+Cjxwb2x5Z29uIGNsYXNzPSJiZ19maWxsIiBwb2ludHM9IjIsMiAyLDEyIDE4LDcgMiwyIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjaXJjbGUiIG1hcmtlckhlaWdodD0iNSIgbWFya2VyV2lkdGg9IjUiIG9yaWVudD0iYXV0byIgcmVmWD0iMTAiIHJlZlk9IjEwIiB2aWV3Qm94PSIwIDAgMjAgMjAiPgo8Y2lyY2xlIGNsYXNzPSJmZ19maWxsIiBjeD0iMTAiIGN5PSIxMCIgcj0iOCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ic3F1YXJlIiBtYXJrZXJIZWlnaHQ9IjUiIG1hcmtlcldpZHRoPSI1IiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEwIiByZWZZPSIxMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KPHJlY3QgY2xhc3M9ImZnX2ZpbGwiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgeD0iMCIgeT0iMCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ib3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMTAiIG1hcmtlcldpZHRoPSIxMCIgb3JpZW50PSJhdXRvIiByZWZYPSIxMCIgcmVmWT0iMTAiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIxMCIgY3k9IjEwIiByPSI0Ii8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJiaWdfb3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMjAiIG1hcmtlcldpZHRoPSIyMCIgb3JpZW50PSJhdXRvIiByZWZYPSIyMCIgcmVmWT0iMjAiIHZpZXdCb3g9IjAgMCA0MCA0MCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIyMCIgY3k9IjIwIiByPSI2Ii8+CjwvbWFya2VyPgo8L2RlZnM+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgpyZWN0LmJhY2tkcm9wIHsKICAgIGZpbGw6IHdoaXRlOwp9CnRleHR7CiAgICBmaWxsOiBibGFjazsKfQoKY2lyY2xlIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9CgpsaW5lIHsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCnBhdGggewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCmxpbmUuZGFzaGVkIHsKICAgIHN0cm9rZS1kYXNoYXJyYXk6IDU7Cn0KCi5mZ19maWxsIHsKICAgIGZpbGw6IGJsYWNrOwp9CgoKLmJnX2ZpbGwgewogICAgZmlsbDogd2hpdGU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9Cgp0c3Bhbi5oZWFkewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKfQogICAgCjwvc3R5bGU+CjxyZWN0IGNsYXNzPSJiYWNrZHJvcCIgaGVpZ2h0PSI1MTIiIHdpZHRoPSI1NzYiIHg9IjAiIHk9IjAiLz4KPGc+CjxsaW5lIHgxPSIyMCIgeDI9IjIwIiB5MT0iNzYiIHkyPSIxMDAiLz4KPHBhdGggZD0iTSAyMCAxMDAgQSA0IDQgMCAwIDAgMjQgMTA0Ii8+CjxwYXRoIGQ9Ik0gMjQgNzIgQSA0IDQgMCAwIDAgMjAgNzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIwIiB4Mj0iMjAiIHkxPSIyNjgiIHkyPSIyOTIiLz4KPHBhdGggZD0iTSAyMCAyOTIgQSA0IDQgMCAwIDAgMjQgMjk2Ii8+CjxwYXRoIGQ9Ik0gMjQgMjY0IEEgNCA0IDAgMCAwIDIwIDI2OCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjAiIHgyPSIyMCIgeTE9IjQ3NiIgeTI9IjUwMCIvPgo8cGF0aCBkPSJNIDIwIDUwMCBBIDQgNCAwIDAgMCAyNCA1MDQiLz4KPHBhdGggZD0iTSAyNCA0NzIgQSA0IDQgMCAwIDAgMjAgNDc2Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNCIgeDI9IjE2OCIgeTE9IjcyIiB5Mj0iNzIiLz4KPHBhdGggZD0iTSAxNzIgNzYgQSA0IDQgMCAwIDAgMTY4IDcyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNCIgeDI9IjE2OCIgeTE9IjEwNCIgeTI9IjEwNCIvPgo8cGF0aCBkPSJNIDE2OCAxMDQgQSA0IDQgMCAwIDAgMTcyIDEwMCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjQiIHgyPSIxNjgiIHkxPSIyNjQiIHkyPSIyNjQiLz4KPHBhdGggZD0iTSAxNzIgMjY4IEEgNCA0IDAgMCAwIDE2OCAyNjQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI0IiB4Mj0iMTY4IiB5MT0iMjk2IiB5Mj0iMjk2Ii8+CjxwYXRoIGQ9Ik0gMTY4IDI5NiBBIDQgNCAwIDAgMCAxNzIgMjkyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNCIgeDI9IjE4NCIgeTE9IjQ3MiIgeTI9IjQ3MiIvPgo8cGF0aCBkPSJNIDE4OCA0NzYgQSA0IDQgMCAwIDAgMTg0IDQ3MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjQiIHgyPSIxODQiIHkxPSI1MDQiIHkyPSI1MDQiLz4KPHBhdGggZD0iTSAxODQgNTA0IEEgNCA0IDAgMCAwIDE4OCA1MDAiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjM2IiB4Mj0iMzYiIHkxPSIzODAiIHkyPSI0MDQiLz4KPHBhdGggZD0iTSAzNiA0MDQgQSA0IDQgMCAwIDAgNDAgNDA4Ii8+CjxwYXRoIGQ9Ik0gNDAgMzc2IEEgNCA0IDAgMCAwIDM2IDM4MCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDAiIHgyPSIxNTIiIHkxPSIzNzYiIHkyPSIzNzYiLz4KPHBhdGggZD0iTSAxNTYgMzgwIEEgNCA0IDAgMCAwIDE1MiAzNzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQwIiB4Mj0iMTUyIiB5MT0iNDA4IiB5Mj0iNDA4Ii8+CjxwYXRoIGQ9Ik0gMTUyIDQwOCBBIDQgNCAwIDAgMCAxNTYgNDA0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0NCIgeDI9IjQ0IiB5MT0iMTg4IiB5Mj0iMjEyIi8+CjxwYXRoIGQ9Ik0gNDQgMjEyIEEgNCA0IDAgMCAwIDQ4IDIxNiIvPgo8cGF0aCBkPSJNIDQ4IDE4NCBBIDQgNCAwIDAgMCA0NCAxODgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQ4IiB4Mj0iMTQ0IiB5MT0iMTg0IiB5Mj0iMTg0Ii8+CjxwYXRoIGQ9Ik0gMTQ4IDE4OCBBIDQgNCAwIDAgMCAxNDQgMTg0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0OCIgeDI9IjE0NCIgeTE9IjIxNiIgeTI9IjIxNiIvPgo8cGF0aCBkPSJNIDE0NCAyMTYgQSA0IDQgMCAwIDAgMTQ4IDIxMiIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjkyIiB4Mj0iOTIiIHkxPSIxMjgiIHkyPSIxMTYiLz4KPGxpbmUgeDE9IjkyIiB4Mj0iOTIiIHkxPSIxMjgiIHkyPSIxNzYiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCN0cmlhbmdsZSkiIHgxPSI5MiIgeDI9IjkyIiB5MT0iMjQwIiB5Mj0iMjI4Ii8+CjxsaW5lIHgxPSI5MiIgeDI9IjkyIiB5MT0iMjQwIiB5Mj0iMjU2Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iOTIiIHgyPSI5MiIgeTE9IjMyMCIgeTI9IjMwOCIvPgo8bGluZSB4MT0iOTIiIHgyPSI5MiIgeTE9IjMyMCIgeTI9IjM2OCIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjEwMCIgeDI9IjEwMCIgeTE9IjQzMiIgeTI9IjQyMCIvPgo8bGluZSB4MT0iMTAwIiB4Mj0iMTAwIiB5MT0iNDMyIiB5Mj0iNDY0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxNDgiIHgyPSIxNDgiIHkxPSIxODgiIHkyPSIyMTIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjE1NiIgeDI9IjE1NiIgeTE9IjM4MCIgeTI9IjQwNCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTcyIiB4Mj0iMTcyIiB5MT0iNzYiIHkyPSIxMDAiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjE3MiIgeDI9IjE3MiIgeTE9IjI2OCIgeTI9IjI5MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTgwIiB4Mj0iMTgwIiB5MT0iMzgwIiB5Mj0iNDA0Ii8+CjxwYXRoIGQ9Ik0gMTgwIDQwNCBBIDQgNCAwIDAgMCAxODQgNDA4Ii8+CjxwYXRoIGQ9Ik0gMTg0IDM3NiBBIDQgNCAwIDAgMCAxODAgMzgwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxODQiIHgyPSIyODgiIHkxPSIzNzYiIHkyPSIzNzYiLz4KPHBhdGggZD0iTSAyOTIgMzgwIEEgNCA0IDAgMCAwIDI4OCAzNzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjE4NCIgeDI9IjI4OCIgeTE9IjQwOCIgeTI9IjQwOCIvPgo8cGF0aCBkPSJNIDI4OCA0MDggQSA0IDQgMCAwIDAgMjkyIDQwNCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTg4IiB4Mj0iMTg4IiB5MT0iNDc2IiB5Mj0iNTAwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyMDQiIHgyPSIyMDQiIHkxPSI0NzYiIHkyPSI1MDAiLz4KPHBhdGggZD0iTSAyMDQgNTAwIEEgNCA0IDAgMCAwIDIwOCA1MDQiLz4KPHBhdGggZD0iTSAyMDggNDcyIEEgNCA0IDAgMCAwIDIwNCA0NzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIwOCIgeDI9IjM2MCIgeTE9IjQ3MiIgeTI9IjQ3MiIvPgo8cGF0aCBkPSJNIDM2NCA0NzYgQSA0IDQgMCAwIDAgMzYwIDQ3MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjA4IiB4Mj0iMzYwIiB5MT0iNTA0IiB5Mj0iNTA0Ii8+CjxwYXRoIGQ9Ik0gMzYwIDUwNCBBIDQgNCAwIDAgMCAzNjQgNTAwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyMzYiIHgyPSIyMzYiIHkxPSIzMjgiIHkyPSIzMjAiLz4KPGxpbmUgeDE9IjIzNiIgeDI9IjI0MCIgeTE9IjMyOCIgeTI9IjMyOCIvPgo8bGluZSBjbGFzcz0iZGFzaGVkIiB4MT0iMjM2IiB4Mj0iMjM2IiB5MT0iMCIgeTI9IjMyMCIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjIzNiIgeDI9IjIzNiIgeTE9IjQzMiIgeTI9IjQyMCIvPgo8bGluZSB4MT0iMjM2IiB4Mj0iMjM2IiB5MT0iNDMyIiB5Mj0iNDY0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNTIiIHkxPSIxNTYiIHkyPSIyMDAiLz4KPGxpbmUgeDE9IjI1MiIgeDI9IjI1MiIgeTE9IjIwMCIgeTI9IjM2OCIvPgo8bGluZSB4MT0iMjUyIiB4Mj0iMzcyIiB5MT0iMjAwIiB5Mj0iMjAwIi8+CjxsaW5lIHgxPSIzNzIiIHgyPSIzNzIiIHkxPSIxNzYiIHkyPSIyMDAiLz4KPGxpbmUgeDE9IjM3MiIgeDI9IjM3MiIgeTE9IjIwMCIgeTI9IjI1NiIvPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjM3MiIgeDI9IjQ2MCIgeTE9IjIwMCIgeTI9IjIwMCIvPgo8cGF0aCBkPSJNIDI1NiAxNTIgQSA0IDQgMCAwIDAgMjUyIDE1NiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjU2IiB4Mj0iMzA0IiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjxwYXRoIGQ9Ik0gMzA0IDE1MiBBIDQgNCAwIDAgMCAzMDggMTQ4Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyNzYiIHgyPSIyNzYiIHkxPSIzNDgiIHkyPSIzNjgiLz4KPHBhdGggZD0iTSAyODAgMzQ0IEEgNCA0IDAgMCAwIDI3NiAzNDgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI4MCIgeDI9IjMyMCIgeTE9IjM0NCIgeTI9IjM0NCIvPgo8cGF0aCBkPSJNIDMyMCAzNDQgQSA0IDQgMCAwIDAgMzI0IDM0MCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjkyIiB4Mj0iMjkyIiB5MT0iNzYiIHkyPSIxMDAiLz4KPHBhdGggZD0iTSAyOTIgMTAwIEEgNCA0IDAgMCAwIDI5NiAxMDQiLz4KPHBhdGggZD0iTSAyOTYgNzIgQSA0IDQgMCAwIDAgMjkyIDc2Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyOTIiIHgyPSIyOTIiIHkxPSIyNjgiIHkyPSIyOTIiLz4KPHBhdGggZD0iTSAyOTIgMjkyIEEgNCA0IDAgMCAwIDI5NiAyOTYiLz4KPHBhdGggZD0iTSAyOTYgMjY0IEEgNCA0IDAgMCAwIDI5MiAyNjgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI5MiIgeDI9IjI5MiIgeTE9IjM4MCIgeTI9IjQwNCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjk2IiB4Mj0iNDMyIiB5MT0iNzIiIHkyPSI3MiIvPgo8cGF0aCBkPSJNIDQzNiA3NiBBIDQgNCAwIDAgMCA0MzIgNzIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI5NiIgeDI9IjQzMiIgeTE9IjEwNCIgeTI9IjEwNCIvPgo8cGF0aCBkPSJNIDQzMiAxMDQgQSA0IDQgMCAwIDAgNDM2IDEwMCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjk2IiB4Mj0iNDMyIiB5MT0iMjY0IiB5Mj0iMjY0Ii8+CjxwYXRoIGQ9Ik0gNDM2IDI2OCBBIDQgNCAwIDAgMCA0MzIgMjY0Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyOTYiIHgyPSI0MzIiIHkxPSIyOTYiIHkyPSIyOTYiLz4KPHBhdGggZD0iTSA0MzIgMjk2IEEgNCA0IDAgMCAwIDQzNiAyOTIiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCN0cmlhbmdsZSkiIHgxPSIzMDgiIHgyPSIzMDgiIHkxPSIxMjgiIHkyPSIxMTYiLz4KPGxpbmUgeDE9IjMwOCIgeDI9IjMwOCIgeTE9IjEyOCIgeTI9IjE0OCIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjMxMiIgeDI9IjMwOCIgeTE9IjM5MiIgeTI9IjM5MiIvPgo8bGluZSB4MT0iMzEyIiB4Mj0iMzQwIiB5MT0iMzkyIiB5Mj0iMzkyIi8+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMzQwIiB4Mj0iMzQwIiB5MT0iMzkyIiB5Mj0iNDYwIi8+CjxsaW5lIHgxPSIzNDAiIHgyPSIzODgiIHkxPSIzOTIiIHkyPSIzOTIiLz4KPGxpbmUgeDE9IjM4OCIgeDI9IjM4OCIgeTE9IjMyMCIgeTI9IjM5MiIvPgo8bGluZSB4MT0iMzg4IiB4Mj0iMzg4IiB5MT0iMzkyIiB5Mj0iNDIwIi8+CjxsaW5lIHgxPSIzODgiIHgyPSI1MjAiIHkxPSIzOTIiIHkyPSIzOTIiLz4KPHBhdGggZD0iTSAzODggNDIwIEEgNCA0IDAgMCAwIDM5MiA0MjQiLz4KPHBhdGggZD0iTSA1MjAgMzkyIEEgNCA0IDAgMCAwIDUyNCAzODgiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCN0cmlhbmdsZSkiIHgxPSIzMjQiIHgyPSIzMjQiIHkxPSIzMjAiIHkyPSIzMDgiLz4KPGxpbmUgeDE9IjMyNCIgeDI9IjMyNCIgeTE9IjMyMCIgeTI9IjM0MCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMzY0IiB4Mj0iMzY0IiB5MT0iNDc2IiB5Mj0iNTAwIi8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMzcyIiB4Mj0iMzcyIiB5MT0iMTEyIiB5Mj0iMTQwIi8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMzcyIiB4Mj0iMzcyIiB5MT0iMTc2IiB5Mj0iMTY0Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMzg0IiB4Mj0iMzgwIiB5MT0iNDg4IiB5Mj0iNDg4Ii8+CjxsaW5lIHgxPSIzODQiIHgyPSI0MDAiIHkxPSI0ODgiIHkyPSI0ODgiLz4KPHBhdGggZD0iTSA0MDAgNDg4IEEgNCA0IDAgMCAwIDQwNCA0ODQiLz4KPC9nPgo8Zz4KPGxpbmUgbWFya2VyLWVuZD0idXJsKCN0cmlhbmdsZSkiIHgxPSIzODgiIHgyPSIzODgiIHkxPSIzMjAiIHkyPSIzMDgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjM5MiIgeDI9IjQ5NiIgeTE9IjQyNCIgeTI9IjQyNCIvPgo8cGF0aCBkPSJNIDUwMCA0MjggQSA0IDQgMCAwIDAgNDk2IDQyNCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDA0IiB4Mj0iNDA0IiB5MT0iNDc2IiB5Mj0iNDg0Ii8+CjxwYXRoIGQ9Ik0gNDA4IDQ3MiBBIDQgNCAwIDAgMCA0MDQgNDc2Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0MDgiIHgyPSI0MjQiIHkxPSI0NzIiIHkyPSI0NzIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQyNCIgeDI9IjUyMCIgeTE9IjE1MiIgeTI9IjE1MiIvPgo8cGF0aCBkPSJNIDUyNCAxNTYgQSA0IDQgMCAwIDAgNTIwIDE1MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDM2IiB4Mj0iNDM2IiB5MT0iNzYiIHkyPSIxMDAiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQzNiIgeDI9IjQzNiIgeTE9IjI2OCIgeTI9IjI5MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDM2IiB4Mj0iNDM2IiB5MT0iNDYwIiB5Mj0iNDg0Ii8+CjxwYXRoIGQ9Ik0gNDM2IDQ4NCBBIDQgNCAwIDAgMCA0NDAgNDg4Ii8+CjxwYXRoIGQ9Ik0gNDQwIDQ1NiBBIDQgNCAwIDAgMCA0MzYgNDYwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0NDAiIHgyPSI1NTIiIHkxPSI0NTYiIHkyPSI0NTYiLz4KPHBhdGggZD0iTSA1NTYgNDYwIEEgNCA0IDAgMCAwIDU1MiA0NTYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQ0MCIgeDI9IjU1MiIgeTE9IjQ4OCIgeTI9IjQ4OCIvPgo8cGF0aCBkPSJNIDU1MiA0ODggQSA0IDQgMCAwIDAgNTU2IDQ4NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDUyIiB4Mj0iNDQ4IiB5MT0iMzI4IiB5Mj0iMzI4Ii8+CjxsaW5lIHgxPSI0NTIiIHgyPSI0NTIiIHkxPSIzMjgiIHkyPSIzMjAiLz4KPGxpbmUgY2xhc3M9ImRhc2hlZCIgeDE9IjQ1MiIgeDI9IjQ1MiIgeTE9IjIwOCIgeTI9IjMyMCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNDc2IiB4Mj0iNDc2IiB5MT0iMTg4IiB5Mj0iMjEyIi8+CjxwYXRoIGQ9Ik0gNDc2IDIxMiBBIDQgNCAwIDAgMCA0ODAgMjE2Ii8+CjxwYXRoIGQ9Ik0gNDgwIDE4NCBBIDQgNCAwIDAgMCA0NzYgMTg4Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0ODAiIHgyPSI1NjgiIHkxPSIxODQiIHkyPSIxODQiLz4KPHBhdGggZD0iTSA1NzIgMTg4IEEgNCA0IDAgMCAwIDU2OCAxODQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjQ4MCIgeDI9IjU2OCIgeTE9IjIxNiIgeTI9IjIxNiIvPgo8cGF0aCBkPSJNIDU2OCAyMTYgQSA0IDQgMCAwIDAgNTcyIDIxMiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNTAwIiB4Mj0iNTAwIiB5MT0iNDI4IiB5Mj0iNDQ4Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iNTI0IiB4Mj0iNTI0IiB5MT0iMTU2IiB5Mj0iMTcyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSI1MjQiIHgyPSI1MjQiIHkxPSIyMjQiIHkyPSIzODgiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjU1NiIgeDI9IjU1NiIgeTE9IjQ2MCIgeTI9IjQ4NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNTcyIiB4Mj0iNTcyIiB5MT0iMTg4IiB5Mj0iMjEyIi8+CjwvZz4KPGc+CjxsaW5lIGNsYXNzPSJkYXNoZWQiIHgxPSI0MjAiIHgyPSI0MjAiIHkxPSIzMzYiIHkyPSIzODQiLz4KPC9nPgo8Zz4KPGxpbmUgY2xhc3M9ImRhc2hlZCIgeDE9IjQyMCIgeDI9IjQyMCIgeTE9IjQwMCIgeTI9IjQxNiIvPgo8L2c+CjxnPgo8bGluZSBjbGFzcz0iZGFzaGVkIiB4MT0iNDIwIiB4Mj0iNDIwIiB5MT0iNDMyIiB5Mj0iNDY0Ii8+CjwvZz4KPGc+CjxsaW5lIGNsYXNzPSJkYXNoZWQiIHgxPSI0MjAiIHgyPSI0MjAiIHkxPSI0ODAiIHkyPSI1MTIiLz4KPC9nPgo8Zz4KPGxpbmUgY2xhc3M9ImRhc2hlZCIgeDE9IjQ1MiIgeDI9IjQ1MiIgeTE9IjMyIiB5Mj0iMTQ0Ii8+CjwvZz4KPGc+CjxsaW5lIGNsYXNzPSJkYXNoZWQiIHgxPSI0NTIiIHgyPSI0NTIiIHkxPSIxNjAiIHkyPSIxOTIiLz4KPC9nPgo8Zz4KPHRleHQgeD0iMSIgeT0iMTIiIHRleHRMZW5ndGg9IjMyIj4KOjpyMwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMzIiB5PSI5MiIgdGV4dExlbmd0aD0iNDAiPgp0cmFpdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMzIiB5PSIyODQiIHRleHRMZW5ndGg9IjQwIj4KdHJhaXQKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIzMyIgeT0iNDkyIiB0ZXh0TGVuZ3RoPSI0MCI+CnRyYWl0CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNDkiIHk9IjM5NiIgdGV4dExlbmd0aD0iNDAiPgp0cmFpdAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjU3IiB5PSIyMDQiIHRleHRMZW5ndGg9IjQwIj4KdHJhaXQKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI4MSIgeT0iOTIiIHRleHRMZW5ndGg9IjgwIj4KS2VybmVsQ2ZnMQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjgxIiB5PSIyODQiIHRleHRMZW5ndGg9IjgwIj4KS2VybmVsQ2ZnMgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjgxIiB5PSI0OTIiIHRleHRMZW5ndGg9Ijk2Ij4KUG9ydFRvS2VybmVsCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOTciIHk9IjM5NiIgdGV4dExlbmd0aD0iNDgiPgpLZXJuZWwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxMDUiIHk9IjIwNCIgdGV4dExlbmd0aD0iMzIiPgpQb3J0CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMTkzIiB5PSIzOTYiIHRleHRMZW5ndGg9IjMyIj4KaW1wbAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjIxNyIgeT0iNDkyIiB0ZXh0TGVuZ3RoPSIzMiI+CmltcGwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyMzMiIHk9IjM5NiIgdGV4dExlbmd0aD0iNDgiPgpLZXJuZWwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNDEiIHk9IjMzMiIgdGV4dExlbmd0aD0iOCI+CuKVtgo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI0OSIgeT0iMTIiIHRleHRMZW5ndGg9IjgwIj4KOjp5b3VyX2FwcAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI0OSIgeT0iNDQiIHRleHRMZW5ndGg9IjQ4Ij4KYnVpbGQhCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMjU3IiB5PSIzMzIiIHRleHRMZW5ndGg9IjY0Ij4K4pW24pW24pW24pW24pW24pW24pW24pW2CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMjU3IiB5PSI0OTIiIHRleHRMZW5ndGg9Ijk2Ij4KUG9ydFRvS2VybmVsCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMzA1IiB5PSI5MiIgdGV4dExlbmd0aD0iMzIiPgppbXBsCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMzA1IiB5PSIyODQiIHRleHRMZW5ndGg9IjMyIj4KaW1wbAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMyOSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI0OCI+CkNvbmZpZwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMyOSIgeT0iMzMyIiB0ZXh0TGVuZ3RoPSI1NiI+CuKVtOKVtOKVtOKVtOKVtOKVtOKVtAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjM0NSIgeT0iOTIiIHRleHRMZW5ndGg9IjgwIj4KS2VybmVsQ2ZnMQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjM0NSIgeT0iMjg0IiB0ZXh0TGVuZ3RoPSI4MCI+Cktlcm5lbENmZzIKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIzODUiIHk9IjE1NiIgdGV4dExlbmd0aD0iMzIiPgpkYXRhCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMzkzIiB5PSIzMzIiIHRleHRMZW5ndGg9IjU2Ij4K4pW04pW04pW04pW04pW04pW04pW0CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNDQ5IiB5PSI0NzYiIHRleHRMZW5ndGg9IjQwIj4KRW50cnkKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI0NjUiIHk9IjQ0IiB0ZXh0TGVuZ3RoPSI3MiI+CnVzZV9wb3J0IQo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ4OSIgeT0iMjA0IiB0ZXh0TGVuZ3RoPSIzMiI+CmltcGwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI0OTciIHk9IjQ3NiIgdGV4dExlbmd0aD0iNDgiPgpwb2ludHMKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI1MjkiIHk9IjIwNCIgdGV4dExlbmd0aD0iMzIiPgpQb3J0CjwvdGV4dD4KPC9nPgo8L3N2Zz4=" alt="kernel-traits" /></span></p>
+<h3 id="use_port--system-type" class="section-header"><a href="#use_port--system-type"><code>use_port!</code> → System Type</a></h3>
+<p>The composition process revolves around an application-defined type called a <strong>system type</strong>. The first thing to do is to define a system type. It could be defined directly, but instead, it’s defined by <code>use_port!</code> purely for convenience. A system type is named <code>System</code> by convention.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">r3_xxx_port</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="comment">// ----- The above macro invocation expands to: -----</span>
+<span class="kw">struct</span> <span class="ident">System</span>;</pre></div>
+<h3 id="use_port--impl-port" class="section-header"><a href="#use_port--impl-port"><code>use_port!</code> → <code>impl Port</code></a></h3>
+<p>The first important role of <code>use_port!</code> is to implement the trait <a href="../r3/kernel/trait.Port.html"><code>Port</code></a> on the system type. <code>Port</code> describes the properties of the target hardware and provides target-dependent low-level functions such as a context switcher. <code>use_port!</code> can define <code>static</code> items to store internal state data (this would be inconvenient and messy without a macro).</p>
+<p><code>Port</code> is actually a group of several supertraits (such as <a href="../r3/kernel/trait.PortThreading.html"><code>PortThreading</code></a>), each of which can be implemented in a separate location.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">r3_xxx_port</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="comment">// ----- The above macro invocation also produces: -----</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">r3</span>::<span class="ident">PortThreading</span> <span class="kw">for</span> <span class="ident">System</span> { <span class="comment">/* ... */</span> }
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">r3</span>::<span class="ident">PortInterrupts</span> <span class="kw">for</span> <span class="ident">System</span> { <span class="comment">/* ... */</span> }
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">r3</span>::<span class="ident">PortTimer</span> <span class="kw">for</span> <span class="ident">System</span> { <span class="comment">/* ... */</span> }
+
+<span class="comment">// `Port` gets implemented automatically when</span>
+<span class="comment">// all required supertraits are implemented.</span></pre></div>
+<p>The job of <code>use_port!</code> doesn’t end here, but before we move on, we must first explain what <code>build!</code> does.</p>
+<h3 id="build--impl-kernelcfgn" class="section-header"><a href="#build--impl-kernelcfgn"><code>build!</code> → <code>impl KernelCfgN</code></a></h3>
+<p><code>build!</code> assembles a database of statically defined kernel objects using a supplied <a href="#static-configuration">configuration function</a>. Using this database, it does things such as determining the optimal data type to represent all allowed task priority values and defining <code>static</code> items to store kernel-private data structures such as task control blocks. The result is attached to a supplied system type by implementing <a href="../r3/kernel/trait.KernelCfg1.html"><code>KernelCfg1</code></a> and <a href="../r3/kernel/trait.KernelCfg2.html"><code>KernelCfg2</code></a> on it.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="kw">static</span> <span class="ident">COTTAGE</span>: <span class="ident">Objects</span> <span class="op">=</span> <span class="ident">r3</span>::<span class="macro">build</span><span class="macro">!</span>(<span class="ident">System</span>, <span class="ident">configure_app</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Objects</span>);
+
+<span class="comment">// ----- The above macro invocation produces: -----</span>
+<span class="kw">static</span> <span class="ident">COTTAGE</span>: <span class="ident">Objects</span> <span class="op">=</span> {
+    <span class="kw">use</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">TaskCb</span>;
+
+    <span class="kw">const</span> <span class="ident">CFG</span>: <span class="comment">/* ... */</span> <span class="op">=</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">cfg</span>::<span class="ident">CfgBuilder</span>::<span class="ident">new</span>();
+        <span class="ident">configure_app</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">cfg</span>);
+        <span class="ident">cfg</span>
+    };
+
+    <span class="kw">static</span> <span class="ident">TASK_CB_POOL</span>: [<span class="ident">TaskCb</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>; <span class="kw">_</span>] <span class="op">=</span> <span class="comment">/* ... */</span>;
+
+    <span class="comment">// Things needed by both of `Port` and `KernelCfg2` should live in</span>
+    <span class="comment">// `KernelCfg1` because `Port` cannot refer to an associated item defined</span>
+    <span class="comment">// by `KernelCfg2`.</span>
+    <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">KernelCfg1</span> <span class="kw">for</span> <span class="ident">System</span> {
+        <span class="kw">type</span> <span class="ident">TaskPriority</span> <span class="op">=</span> <span class="comment">/* ... */</span>;
+    }
+
+    <span class="comment">// Things dependent on data types defined by `Port` should live in</span>
+    <span class="comment">// `KernelCfg2`.</span>
+    <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">KernelCfg2</span> <span class="kw">for</span> <span class="ident">System</span> {
+        <span class="kw">fn</span> <span class="ident">task_cb_pool</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">TaskCb</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>] {
+            <span class="kw-2">&amp;</span><span class="ident">TASK_CB_POOL</span>
+        }
+        <span class="comment">/* ... */</span>
+    }
+
+    <span class="comment">// Make the generated object IDs available to the application</span>
+    <span class="ident">configure_app</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">cfg</span>::<span class="ident">CfgBuilder</span>::<span class="ident">new</span>())
+};</pre></div>
+<h3 id="impl-kernel" class="section-header"><a href="#impl-kernel"><code>impl Kernel</code></a></h3>
+<p>The traits introduced so far are enough to instantiate the target-independent portion of the RTOS kernel. To reflect this, <a href="../r3/kernel/trait.Kernel.html"><code>Kernel</code></a> and <a href="../r3/kernel/trait.PortToKernel.html"><code>PortToKernel</code></a> are automatically implemented on the system type by a blanket <code>impl</code>.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">System</span>: <span class="ident">Port</span> <span class="op">+</span> <span class="ident">KernelCfg1</span> <span class="op">+</span> <span class="ident">KernelCfg2</span><span class="op">&gt;</span> <span class="ident">Kernel</span> <span class="kw">for</span> <span class="ident">System</span> { <span class="comment">/* ... */</span> }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">System</span>: <span class="ident">Kernel</span><span class="op">&gt;</span> <span class="ident">PortToKernel</span> <span class="kw">for</span> <span class="ident">System</span> { <span class="comment">/* ... */</span> }</pre></div>
+<h3 id="use_port--entry-points" class="section-header"><a href="#use_port--entry-points"><code>use_port!</code> → Entry Points</a></h3>
+<p>The remaining task of <code>use_port!</code> is to generate entry points to the kernel. The most important one is for booting the kernel. The other ones are <a href="(#interrupt-handling-framework)">interrupt handlers</a>.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">r3_xxx_port</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="comment">// ----- The above macro invocation lastly produces: -----</span>
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="op">&lt;</span><span class="ident">System</span> <span class="kw">as</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::<span class="ident">PortToKernel</span><span class="op">&gt;</span>::<span class="ident">boot</span>();
+}</pre></div>
+<h2 id="static-configuration" class="section-header"><a href="#static-configuration">Static Configuration</a></h2>
+<p>Kernel objects are created in a <strong>configuration function</strong> having the signature <code>const fn (&amp;mut </code><a href="../r3/kernel/cfg/struct.CfgBuilder.html"><code>CfgBuilder</code></a><code>) -&gt; T</code> (+ optional <code>self</code> and trailing extra parameters). The code generated by <a href="../r3/macro.build.html" title="build!"><code>build!</code></a> calls the supplied <strong>top-level configuration function</strong> (at compile time) to collect information such as a set of kernel objects that need to be instantiated. This information is used to implement <a href="../r3/kernel/trait.KernelCfg1.html"><code>KernelCfg1</code></a> and <a href="../r3/kernel/trait.KernelCfg2.html"><code>KernelCfg2</code></a> on a given system type. At the same time, this process also produces handles to the defined kernel objects (such as <a href="../r3/kernel/struct.Task.html"><code>Task</code></a>), which can be returned from a configuration function directly or packaged in a user-defined container type. <code>build!</code> returns the evaluation result of the top-level configuration function. By storing this in a <code>const</code> variable, the application code can access the kernel objects defined in the configuration function.</p>
+<!-- FIXME: When <https://github.com/rust-lang/cargo/issues/4242> is resolved,
+            the following code block will be doc-testable  -->
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">r3_port_std</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="kw">struct</span> <span class="ident">Objects</span> { <span class="ident">task</span>: <span class="ident">Task</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span> }
+
+<span class="kw">const</span> <span class="ident">COTTAGE</span>: <span class="ident">Objects</span> <span class="op">=</span> <span class="ident">r3</span>::<span class="macro">build</span><span class="macro">!</span>(<span class="ident">System</span>, <span class="ident">configure_app</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Objects</span>);
+
+<span class="comment">// This is the top-level configuration function</span>
+<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">configure_app</span><span class="op">&lt;</span><span class="ident">System</span>: <span class="ident">Kernel</span><span class="op">&gt;</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CfgBuilder</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Objects</span> {
+    <span class="ident">b</span>.<span class="ident">num_task_priority_levels</span>(<span class="number">4</span>);
+    <span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">Task</span>::<span class="ident">build</span>()
+        .<span class="ident">start</span>(<span class="ident">task_body</span>).<span class="ident">priority</span>(<span class="number">3</span>).<span class="ident">active</span>(<span class="bool-val">true</span>).<span class="ident">finish</span>(<span class="ident">b</span>);
+    <span class="ident">Objects</span> { <span class="ident">task</span> }
+}
+
+<span class="kw">fn</span> <span class="ident">task_body</span>(<span class="kw">_</span>: <span class="ident">usize</span>) {
+    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">COTTAGE</span>.<span class="ident">task</span>, <span class="ident">Task</span>::<span class="ident">current</span>().<span class="ident">unwrap</span>());
+}</pre></div>
+<p>Configuration functions are highly composable as they can call other configuration functions in turn. In some sense, this is a way to attribute a certain semantics to a group of kernel objects, making them behave in a meaningful way as a whole, and expose a whole new, higher-level interface. For example, a <a href="../r3/sync/mutex/struct.Mutex.html">mutex object</a> similar to <code>std::sync::Mutex</code> can be created by combining <a href="../r3/kernel/struct.Mutex.html"><code>kernel::Mutex</code></a><code>&lt;System&gt;</code> (a low-level mutex object) and a <a href="../r3/hunk/struct.Hunk.html"><code>hunk::Hunk</code></a><code>&lt;System, UnsafeCell&lt;T&gt;&gt;</code> (a typed hunk), which in turn is built on top of <a href="../r3/kernel/struct.Hunk.html"><code>kernel::Hunk</code></a><code>&lt;System&gt;</code> (a low-level untyped hunk).</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="comment">// Top-level configuration function</span>
+<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">configure_app</span><span class="op">&lt;</span><span class="ident">System</span>: <span class="ident">Kernel</span><span class="op">&gt;</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CfgBuilder</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Objects</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span> {
+    <span class="ident">b</span>.<span class="ident">num_task_priority_levels</span>(<span class="number">4</span>);
+    <span class="kw">let</span> <span class="ident">my_module</span> <span class="op">=</span> <span class="ident">m</span>::<span class="ident">configure</span>(<span class="ident">b</span>);
+    <span class="ident">Objects</span> { <span class="ident">my_module</span> }
+}
+
+<span class="kw">mod</span> <span class="ident">m</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">configure</span><span class="op">&lt;</span><span class="ident">System</span>: <span class="ident">Kernel</span><span class="op">&gt;</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CfgBuilder</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MyModule</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">Task</span>::<span class="ident">build</span>()
+            .<span class="ident">start</span>(<span class="ident">task_body</span>).<span class="ident">priority</span>(<span class="number">3</span>).<span class="ident">active</span>(<span class="bool-val">true</span>).<span class="ident">finish</span>(<span class="ident">b</span>);
+        <span class="ident">MyModule</span> { <span class="ident">task</span> }
+    }
+
+    <span class="kw">fn</span> <span class="ident">task_body</span>(<span class="kw">_</span>: <span class="ident">usize</span>) {}
+}</pre></div>
+<p>The constructors of kernel objects are configuration functions by themselves, but they are different from normal configuration functions in that they can actually mutate the contents of <code>CfgBuilder</code> (which <code>build!</code> will use to create kernel structures in the final form), ultimately shaping the outcome of the configuration process. Therefore, they are the smallest building blocks of configuration functions.</p>
+<h1 id="system-states" class="section-header"><a href="#system-states">System States</a></h1>
+<p>A system can be in some of the system states described in this section at any point.</p>
+<p><strong>CPU Lock</strong> disables all managed interrupts and dispatching. On a uniprocessor system (which this kernel targets), this is a convenient way to create a critical section to protect a shared resource from concurrent accesses. Most system services are unavailable when CPU Lock is active and will return <a href="../r3/kernel/enum.ResultCode.html#variant.BadContext"><code>BadContext</code></a>. Application code can use <a href="../r3/kernel/trait.Kernel.html#tymethod.acquire_cpu_lock"><code>acquire_cpu_lock</code></a> to activate CPU Lock.</p>
+<p>Like a lock guard of a mutex, CPU Lock can be thought of as something to be “owned” by a current thread. This conception allows it to be seamlessly integrated with Rust’s vocabulary and mental model around the ownership model.</p>
+<p><strong>Priority Boost</strong> temporarily raises the effective priority of the current task to higher than any values possible in normal circumstances. Priority Boost can only be activated or deactivated in a task context. Potentially blocking system services are disallowed when Priority Boost is active and will return <a href="../r3/kernel/enum.ResultCode.html#variant.BadContext"><code>BadContext</code></a>. Application code can use <a href="../r3/kernel/trait.Kernel.html#tymethod.boost_priority"><code>boost_priority</code></a> to activate Priority Boost.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Relation to Other Specifications:</strong> Inspired from the μITRON4.0 specification. CPU Lock and Priority Boost correspond to a CPU locked state and a dispatching state from μITRON4.0, respectively. In contrast to this specification, both concepts are denoted by proper nouns in the R3 RTOS. This means phrases like “when the CPU is locked” are not allowed.</p>
+<p>CPU Lock corresponds to <code>SuspendOSInterrupts</code> and <code>ResumeOSInterrupts</code> from the OSEK/VDX specification.</p>
+</blockquote>
+<h1 id="threads" class="section-header"><a href="#threads">Threads</a></h1>
+<p>An <strong>(execution) thread</strong> is a sequence of instructions executed by a processor. There can be multiple threads existing at the same time and the kernel is responsible for deciding which thread to run at any point on a processor (this process is called scheduling). The location in a program where a thread starts execution is called the thread’s <strong>entry point function</strong> for the thread. A thread exits when it returns from its entry point function¹ or calls <a href="../r3/kernel/trait.Kernel.html#tymethod.exit_task"><code>exit_task</code></a> (valid only for tasks).</p>
+<p>¹ More precisely, a thread starts execution with a hypothetical function call to the entry point function, and it exits when it returns from this hypothetical function call.</p>
+<p>The properties of threads such as how and when they are created and whether they can block or not are specific to each thread type.</p>
+<p>The initial thread that starts up the kernel (by calling <a href="../r3/kernel/trait.PortToKernel.html#tymethod.boot"><code>PortToKernel::boot</code></a>) is called the <strong>main thread</strong>. This is where the initialization of kernel structures takes place. Additionally, an application can register one or more <a href="../r3/kernel/struct.StartupHook.html"><strong>startup hooks</strong></a> to execute user code here. Startup hooks execute with CPU Lock active and <em>should never deactivate CPU Lock</em>. The main thread exits when the kernel requests the port to dispatch the first task.</p>
+<p>A <strong><a href="#interrupt-handling-framework">first-level interrupt handler</a></strong> starts execution in its own thread in response to asynchronous external events (interrupts). This type of thread always runs to completion but can be preempted by other interrupt handlers. No blocking system calls are allowed in an interrupt handler. A first-level interrupt handler calls the associated application-provided <strong>second-level interrupt handlers</strong> (<a href="../r3/kernel/struct.InterruptHandler.html"><code>InterruptHandler</code></a>) as well as the callback functions of <strong>timers</strong> (<a href="../r3/kernel/struct.Timer.html"><code>Timer</code></a>) through a port timer driver and the kernel timing core.</p>
+<p>A <strong>task</strong> (<a href="../r3/kernel/struct.Task.html"><code>Task</code></a>) is the kernel object that can create a thread whose execution is controlled by application code. Each task encapsulates a variety of state data necessary for the execution and scheduling of the associated thread, such as <a href="../r3/kernel/cfg/struct.CfgTaskBuilder.html#method.stack_size">a stack region</a> to store local variables and activation frames, the current <a href="../r3/kernel/cfg/struct.CfgTaskBuilder.html#method.priority">priority</a>, the <a href="../r3/kernel/struct.Task.html#method.unpark">parking</a> state of the task, and a memory region used to save the state of CPU registers when the task is blocked or preempted. The associated thread can be started by <strong><a href="../r3/kernel/struct.Task.html#method.activate">activating</a></strong> that task. A task-based thread can make blocking system calls, which will temporarily block the execution of the thread until certain conditions are met. Task-based threads can be preempted by any kind of thread.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Relation to Other Specifications:</strong> Not many kernel designs use the word “thread” to describe the concept that applies to both of interrupts and tasks (one notable exception being <a href="http://software-dl.ti.com/lprf/simplelink_cc13x0_sdk/1_30_00_06/exports/docs/ti154stack/ti154stack-sdg/ti154stack-sdg/tirtos/rtos-overview.html">TI-RTOS</a>), most likely because threads are used to refer to a specific concept in general-purpose operating systems, or they are simply considered synonymous with tasks. For example, the closest concept in the μITRON4.0 specification is <em>processing units</em>. Despite that, it was decided that “thread” was an appropriate term to refer to this concept. The primary factors that drove this decision include: (1) the need for a conceptual entity that can “own” locks, and (2) that this concept is important for discussing thread safety without substituting every mention of “thread” with “task or interrupt handler”.</p>
+</blockquote>
+<h1 id="contexts" class="section-header"><a href="#contexts">Contexts</a></h1>
+<p>A context is a general term that is often used to describe the “environment” a function executes in. Terms like <em>a task context</em> are used to specify the type of thread a calling thread is expected to be. The following list shows the terms we use to describe contexts throughout this kernel’s documentation:</p>
+<ul>
+<li>Being in a <strong>task context</strong> means the current <a href="#threads">thread</a> pertains to a task.</li>
+<li>Being in an <strong>interrupt context</strong> means the current thread pertains to an interrupt handler.</li>
+<li>Being in a <strong>boot context</strong> means the current thread is the main thread. <a href="../r3/kernel/struct.StartupHook.html">Startup hooks</a> allow user code to execute in this context.</li>
+<li>Being in a <strong>waitable context</strong> means that the current context is a task context and <a href="#system-states">Priority Boost</a> is inactive.</li>
+</ul>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Relation to Other Specifications:</strong> <a href="http://www.ertl.jp/ITRON/SPEC/mitron4-e.html">The μITRON4.0 specification</a>, <a href="https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_OS.pdf">the AUTOSAR OS specification</a>, and <a href="https://www.rtems.org">RTEMS</a>’s user manuals use the term “context” in a similar way.</p>
+</blockquote>
+<h1 id="interrupt-handling-framework" class="section-header"><a href="#interrupt-handling-framework">Interrupt Handling Framework</a></h1>
+<p>A port may support managing interrupt lines and interrupt handlers through an interface defined by the kernel. When it’s supported, an application can use this facility to configure interrupt lines and attach interrupt handlers. It’s <strong>port-defined</strong> whether a port supports managing or <em>not</em> managing interrupt lines and interrupt handlers.</p>
+<p>The benefits of providing a standardized interface for interrupts include: (1) increased portability of applications and libraries across target platforms, (2) well-defined semantics of system calls inside an interrupt handler, and (3) decoupling hardware driver components on a system with a non-vectorized interrupt controller or multiplexed interrupt lines. The downsides include: (1) obscuring non-standard hardware features, (2) interference with other ways of managing interrupts (e.g., board support packages, IDEs), (3) additional layer of abstraction that makes the system mechanism unclear.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Port Implementation Note:</strong> System calls can provide well-defined semantics inside an interrupt handler only if the port adheres to this interrupt handling framework. If a port developer chooses not to follow this, they are responsible to properly explain the interaction between interrupts and the kernel.</p>
+</blockquote>
+<p>An interrupt request is delivered to a processor by sending a hardware signal to an interrupt controller through an <strong>interrupt line</strong>. It’s possible that more than one interrupt source is connected to a single interrupt line. Upon receiving an interrupt request, the interrupt controller translates the interrupt line to an <strong>interrupt number</strong> and transfers the control to the <strong>first-level interrupt handler</strong> associated with that interrupt number.</p>
+<p>Each interrupt line has configurable attributes such as an <strong>interrupt priority</strong>. An application can instruct the kernel to configure them at boot time by <a href="../r3/kernel/cfg/struct.CfgInterruptLineBuilder.html"><code>CfgInterruptLineBuilder</code></a> or at runtime by <a href="../r3/kernel/struct.InterruptLine.html"><code>InterruptLine</code></a>. The interpretation of interrupt priority values is up to a port, but they are usually used to define precedence among interrupt lines in some way, such as favoring one over another when multiple interrupt requests are received at the same time or allowing a higher-priority interrupt handler to preempt another.</p>
+<p>The kernel occasionally disables interrupts by activating CPU Lock. The additional interrupt latency introduced by this can pose a problem for time-sensitive applications. To resolve this problem, a port may implement CPU Lock in a way that doesn’t disable interrupt lines with a certain priority value and higher. Such priority values and the first-/second-level interrupt handlers for such interrupt lines are said to be <strong>unmanaged</strong>. The behavior of system calls inside unmanaged interrupt handlers is undefined. Interrupt handlers that aren’t unmanaged are said to be <strong>managed</strong>.</p>
+<p>An application can register one or more <strong>(second-level) interrupt handlers</strong> to an interrupt number. They execute in a serial fashion inside a first-level interrupt handler for the interrupt number. The static configuration system automatically combines multiple second-level interrupt handlers into one (thus taking care of the “execute in a serial fashion” part). <strong>It’s up to a port to generate a first-level interrupt handler</strong> that executes in an appropriate situation, takes care of low-level tasks such as saving and restoring registers, and calls the (combined) second-level interrupt handler.</p>
+<p>Interrupt handlers execute with CPU Lock inactive and may return with CPU Lock either active or inactive. Some system calls are not allowed in there and will return <a href="../r3/kernel/enum.ResultCode.html#variant.BadContext"><code>BadContext</code></a>.</p>
+<p>The behavior of system calls is undefined inside an unmanaged interrupt handler. The property of being protected from programming errors caused by making system calls inside an unmanaged interrupt handler is called <strong>unmanaged safety</strong>. Most system services are not marked as <code>unsafe</code>, so in order to ensure unmanaged safety, safe code shouldn’t be allowed to register an interrupt handler that potentially executes as an unmanaged interrupt handler. On the other hand, the number of <code>unsafe</code> blocks in application code should be minimized in common use cases. To meet this goal, this framework employs several safeguards: (1) Interrupt handlers can be <a href="../r3/kernel/cfg/struct.CfgInterruptHandlerBuilder.html#method.unmanaged">explicitly marked</a> as <strong>unmanaged-safe</strong> (safe to use as an unmanaged interrupt handler), but this requires an <code>unsafe</code> block. (2) An interrupt line must be initialized with a priority value that falls within <a href="../r3/kernel/trait.PortInterrupts.html#associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE">a managed range</a> if it has a non-unmanaged-safe interrupt handler. (3) When <a href="../r3/kernel/struct.InterruptLine.html#method.set_priority">changing</a> the priority of an interrupt line, the new priority must be in a managed range. It’s possible to <a href="../r3/kernel/struct.InterruptLine.html#method.set_priority_unchecked">bypass</a> this check, but this requires an <code>unsafe</code> block.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Relation to Other Specifications:</strong> The division between managed and unmanaged interrupt handlers can be seen in FreeRTOS (some ports), μITRON4.0, and OSEK/VDX. The method of leveraging Rust’s <code>unsafe</code> system to ensure unmanaged safety is obviously Rust-specific and novel.</p>
+<p>Interrupt handlers and interrupt service routines (terms from μITRON4.0) have been renamed to first-level interrupt handlers and (second-level) interrupt handlers, respectively, because “interrupt service routine” was way too long to type and abbreviating it would result in a set of type names which is either excessively inconsistent (<code>InterruptLine</code>, <code>Irq</code>) or bizarre (<code>InterruptLine</code>, <code>InterruptRq</code>). Removing the term “interrupt service routine” should also remove a source of confusion because interrupt handlers and interrupt service routines are often regarded as synonymous with each other (as evident in <a href="https://en.wikipedia.org/w/index.php?title=Interrupt_handler&amp;oldid=934917582">the Wikipedia article</a> on interrupt handler), whereas there is a clear sequential relationship between first-level and second-level.</p>
+</blockquote>
+<h1 id="kernel-timing" class="section-header"><a href="#kernel-timing">Kernel Timing</a></h1>
+<p>The R3 RTOS provides a timing system to enable tracking timed events such as wait operations with timeout.</p>
+<p>The kernel uses <strong>microseconds</strong> as the system time unit. A span of time (<a href="../r3/time/struct.Duration.html"><code>Duration</code></a>) is represented by a 32-bit signed integer (the negative part is only used by the clock adjustment API), which can hold up to 35′47.483647″.</p>
+<p><strong>The system clock</strong> is a feature of the kernel that manages and exposes a global <strong>system time</strong> (<a href="../r3/time/struct.Time.html"><code>Time</code></a>), which is represented by a 64-bit integer. The system time starts at zero, thus behaving like uptime, but it can be updated by an application to represent a real calender time. The method <a href="../r3/kernel/trait.Kernel.html#tymethod.set_time"><code>set_time</code></a> updates the global system time with a new value.</p>
+<p>Another way to update the system time is to move it forward or back by a specified delta by calling <a href="../r3/kernel/trait.Kernel.html#tymethod.adjust_time"><code>adjust_time</code></a>. This update method <em>preserves the absolute (w.r.t. the system time) arrival times of existing timed events</em>. This means that if you have an event scheduled to occur in 10 seconds and you move the system time forward by 2 seconds, the event is now scheduled to occur in 8 seconds.</p>
+<p>The kernel timing is driven by a <strong>port timer driver</strong>, which is part of a port. The kernel and the driver communicate through the traits <a href="../r3/kernel/trait.PortTimer.html"><code>PortTimer</code></a>​ (kernel → driver) and <a href="../r3/kernel/trait.PortToKernel.html"><code>PortToKernel</code></a>​ (driver → kernel).</p>
+<p>The kernel expects that timer interrupts are handled in a timely manner. The resilience against overdue timer interrupts is limited by two factors: (1) <a href="../r3/kernel/trait.PortTimer.html#associatedconstant.MAX_TICK_COUNT"><code>PortTimer::MAX_TICK_COUNT</code></a><code>-</code><a href="../r3/kernel/trait.PortTimer.html#associatedconstant.MAX_TIMEOUT"><code>PortTimer::MAX_TIMEOUT</code></a>, representing the headroom of port-timer timeouts below the timer counter’s representable range. Violating this will cause the kernel to lose track of time. (2) <a href="../r3/kernel/constant.TIME_HARD_HEADROOM.html"><code>TIME_HARD_HEADROOM</code></a>, representing how overdue timed events can be before the internal represention of their arrival times wraps around and the timing algorithm starts exhibiting an incorrect behavior. <strong>The application is responsible for ensuring these limitations are not exceeded</strong>, e.g., by avoiding holding CPU Lock for a prolonged period of time.</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<details>
+<summary>Relation to Other Specifications</summary>
+<p>There are many major design choices when it comes to kernel timing and timed APIs, and they are quite diverse between operating system or kernel specifications. The following list shows some of them:</p>
+<ol>
+<li>
+<p><em>What time unit does the application-facing API use?</em> In embedded operating systems, it’s very common to expose internal ticks and provide C macros to convert real time values into ticks. The conversion is prone to unexpected rounding and integer overflow, and this sort of error is easy to go unnoticed. (For instance, <code>pdMS_TO_TICKS</code> from FreeRTOS uses <code>uint32_t</code> for intermediate value calculation, and <code>gcc</code> won’t report overflow even with <code>-Wall</code> because <code>uint32_t</code> is defined to exhibit a wrap-around behavior. <code>z_tmcvt</code> from Zephyr doesn’t detect overflow.) Even if it could be detected statically (which is never true for dynamically calculated values), the range of real time values that doesn’t cause overflow varies between target systems, harming the portability of software components written for the operating system (how often this cause a problem is debatable).</p>
+<p>Specifications emphasizing portability have often adopted real time values. The conversion to an internal tick value still happens, but because it’s done at a lower level, it’s easy to handle out-of-range cases gracefully, e.g., by dividing a long delay request into shorter ones. The downside of this approach is that it’s hard to avoid the runtime overhead of the conversion process. Supporting fractional times would require a special treatment in this approach. However, as for the conversion overhead, it can be avoided by matching internal ticks to real time values (see item 2).</p>
+<p>The overflow issue can be assuaged by using 64-bit time values.</p>
+</li>
+<li>
+<p><em>Who specifies the frequency of internal ticks? Is it configurable? Or is it bound to real time values?</em> It’s often tied to a hardware timer’s input clock frequency (most tickless kernels) or period (tickful kernels such as an old version of Linux).</p>
+<p>The tick frequency could be fixed at a predetermined value having a simple ratio to a real time unit such as 1kHz. This can reduce or eliminate the time conversion cost, but it can be tricky to get a hardware timer to operate in a desired frequency in some clock configurations.</p>
+</li>
+<li>
+<p><em>Are timed events associated with absolute time values that can be adjusted globally?</em> (I.e., the current absolute time can be adjusted at runtime, and that affects the relative arrival times of all existing time events.) This can be useful for compensating for <a href="https://en.wikipedia.org/wiki/Clock_drift">clock drift</a>, but breaks monotonicity.</p>
+<p>This functionality is tricky to implement because usually an embedded operating system often only tracks some LSBs of an absolute time value (in other words, using modulo-2ⁿ arithmetic), and the interpretation of a value could change if the system time was changed inadvertently. A specific example might further clarify the problem: Let’s say you have an alarm scheduled to fire in 49 days. You request the system to move the system time backward by 1 day. The alarm would npw be scheduled to fire in 50 days, which can’t be represented by a 32-bit integer with millisecond precision, so the request should be rejected.</p>
+</li>
+<li>
+<p><em>Is the timer rate variable?</em> This is another way to compensate for clock drift. This usually done by kernel software as the hardware might not provide sufficient adjustment granularity.</p>
+<p>If this feature is supported, it would be pointless for item 1 to be “ticks” because when this feature is in use, the ticks aren’t actual hardware ticks anymore.</p>
+</li>
+<li>
+<p><em>How many bits does a relative time value have?</em> Sixty four bits would be sufficient to represent any practically meaningful time interval (as far as an earthling civilization is concerned), but that would be overkill for most use cases. The present-day embedded operating systems mainly target 16- or 32-bit microcontrollers with a tight memory constraint. This means unnecessarily-wide data types (especially those wider than 32 bits) should be avoided.</p>
+<p>Thirty two bits can be restrictive, but it’s trivial for an application to work around. It could be made configurable to accommodate the rare use cases where 64-bit time intervals are needed, but then 64-bit arithmetic would increase the processing cost of all timed events, not just the ones needing 64 bits.</p>
+</li>
+<li>
+<p><em>How many bits does the operating system use to track the arrival time for a timed event?</em> This should be greater than or equal to the value of item 5. This interacts with item 3.</p>
+</li>
+</ol>
+<p>Based on these considerations, we decided to take the TOPPERS 3rd generation kernel specification as a model for the kernel timing system, with a few changes.</p>
+<p>The following table summarizes the choices made by each specification, including ours:</p>
+<table><thead><tr><th>Specification</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead><tbody>
+<tr><td><a href="https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_OS.pdf">AUTOSAR OS 4.3.1</a></td><td>ticks</td><td>N/A</td><td>?</td><td>?</td><td>?</td><td>N/A</td></tr>
+<tr><td>FreeRTOS V10</td><td>ticks</td><td>port-specific</td><td>no</td><td>no</td><td>16 or 32 bits</td><td>16 or 32 bits</td></tr>
+<tr><td>OSEX/VDX 2.2.3</td><td>ticks</td><td>N/A</td><td>no</td><td>no</td><td>unspecified bits</td><td>N/A</td></tr>
+<tr><td>POSIX</td><td>nanoseconds</td><td>N/A</td><td>mixed</td><td>no</td><td>≥ 62 bits</td><td>N/A</td></tr>
+<tr><td><a href="https://www.rtems.org">RTEMS</a> Classic</td><td>ticks</td><td>user-configurable</td><td>yes</td><td>no</td><td>32 bits</td><td>?</td></tr>
+<tr><td><a href="http://software-dl.ti.com/lprf/simplelink_cc13x0_sdk/1_30_00_06/exports/docs/ti154stack/ti154stack-sdg/ti154stack-sdg/tirtos/rtos-overview.html">TI-RTOS</a></td><td>ticks</td><td>user-configurable</td><td>no</td><td>no</td><td>?</td><td>?</td></tr>
+<tr><td><a href="https://www.toppers.jp/index.html">TOPPERS</a> New Gen.</td><td>milliseconds</td><td>fixed, milliseconds</td><td>no</td><td>no</td><td>16 bits</td><td>32 bits</td></tr>
+<tr><td>TOPPERS 3rd Gen.</td><td>microseconds</td><td>fixed, microseconds</td><td>yes</td><td>yes</td><td>32 bits</td><td>32 bits</td></tr>
+<tr><td><a href="https://docs.zephyrproject.org/2.3.0/">Zephyr 2.3</a></td><td>ticks</td><td>user-configurable</td><td>no</td><td>no</td><td>32 or 64 bits</td><td>32 or 64 bits</td></tr>
+<tr><td><a href="http://www.ertl.jp/ITRON/SPEC/mitron4-e.html">μITRON4.0</a></td><td>unspecified</td><td>N/A</td><td>no</td><td>no</td><td>unspecified bits</td><td>N/A</td></tr>
+<tr><td>μT-Kernel 3.0</td><td>milli- or micro-seconds</td><td>?</td><td>no</td><td>no</td><td>32 or 64 bits</td><td>?</td></tr>
+<tr><td><strong>R3</strong></td><td>microseconds</td><td>fixed, microseconds</td><td>yes</td><td>no</td><td>31 bits</td><td>32 bits</td></tr>
+</tbody></table>
+</details>
+</blockquote>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Rationale:</strong> As explained in <em>Relation to Other Specifications</em>, using real time values at an API boundary abstracts away the underlying hardware and leads to better portability of software written for the operating system. The microsecond precision should be practically sufficient to deal with non-integral timing requirements.</p>
+<p>Arrival times are tracked by 32-bit modulo-2³² integers. Relative timestamps are limited to 31 bits (excluding the sign bit) to ensure plenty of headroom is always available for global time adjustment. Setting the upper bound in terms of binary digits also lowers the processing cost marginally and avoids the use of an arbitrarily chosen number.</p>
+</blockquote>
+<h1 id="introspection" class="section-header"><a href="#introspection">Introspection</a></h1>
+<p>The entire kernel state can be dumped for inspection by applying debug formatting (<code>{:?}</code>, <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html"><code>Debug</code></a>) on the object returned by <a href="../r3/kernel/trait.Kernel.html#tymethod.debug"><code>Kernel::debug</code></a>. Note that this might consume a large amount of stack space.</p>
+<details>
+<summary>An example output of the kernel debug printing. This was captured during the <code>mutex_protect_priority_by_ceiling</code> test case. Click here to expand.</summary>
+<pre><code class="language-text">Kernel {
+    state: State {
+        running_task: CpuLockCell(Some(
+            TaskCb {
+                self: 0x0000000108686058,
+                port_task_state: TaskState {
+                    tsm: TryLock {
+                        value: Running(
+                            ThreadId(
+                                PoolPtr(
+                                    4,
+                                ),
+                            ),
+                        ),
+                    },
+                },
+                attr: TaskAttr {
+                    entry_point: 0x00000001082d8d10,
+                    entry_param: 0,
+                    stack: StackHunk(
+                        0x0000000108691a08,
+                    ),
+                    priority: 1,
+                },
+                base_priority: CpuLockCell(1),
+                effective_priority: CpuLockCell(1),
+                st: CpuLockCell(Running),
+                link: CpuLockCell(None),
+                wait: TaskWait {
+                    current_wait: CpuLockCell(None),
+                    wait_result: CpuLockCell(Ok(
+                        (),
+                    )),
+                },
+                last_mutex_held: CpuLockCell(None),
+                park_token: CpuLockCell(false),
+            },
+        )),
+        task_ready_bitmap: CpuLockCell([]),
+        task_ready_queue: CpuLockCell([
+            ListHead(None),
+            ListHead(None),
+            ListHead(None),
+            ListHead(None),
+        ]),
+        priority_boost: false,
+        timeout: TimeoutGlobals {
+            last_tick_count: CpuLockCell(12648432),
+            last_tick_time: CpuLockCell(0),
+            last_tick_sys_time: CpuLockCell(0),
+            frontier_gap: CpuLockCell(0),
+            heap: CpuLockCell([
+                TimeoutRef(
+                    0x0000700009988bf8,
+                ),
+            ]),
+            handle_tick_in_progress: CpuLockCell(false),
+        },
+    },
+    task_cb_pool: {
+        0: TaskCb {
+            self: 0x0000000108686000,
+            port_task_state: TaskState {
+                tsm: TryLock {
+                    value: Running(
+                        ThreadId(
+                            PoolPtr(
+                                3,
+                            ),
+                        ),
+                    ),
+                },
+            },
+            attr: TaskAttr {
+                entry_point: 0x00000001082d8bc0,
+                entry_param: 0,
+                stack: StackHunk(
+                    0x0000000108691608,
+                ),
+                priority: 0,
+            },
+            base_priority: CpuLockCell(0),
+            effective_priority: CpuLockCell(0),
+            st: CpuLockCell(Waiting),
+            link: CpuLockCell(None),
+            wait: TaskWait {
+                current_wait: CpuLockCell(Some(
+                    Mutex(0x7000097860d0),
+                )),
+                wait_result: CpuLockCell(Ok(
+                    (),
+                )),
+            },
+            last_mutex_held: CpuLockCell(None),
+            park_token: CpuLockCell(false),
+        },
+        1: TaskCb {
+            self: 0x0000000108686058,
+            port_task_state: TaskState {
+                tsm: TryLock {
+                    value: Running(
+                        ThreadId(
+                            PoolPtr(
+                                4,
+                            ),
+                        ),
+                    ),
+                },
+            },
+            attr: TaskAttr {
+                entry_point: 0x00000001082d8d10,
+                entry_param: 0,
+                stack: StackHunk(
+                    0x0000000108691a08,
+                ),
+                priority: 1,
+            },
+            base_priority: CpuLockCell(1),
+            effective_priority: CpuLockCell(1),
+            st: CpuLockCell(Running),
+            link: CpuLockCell(None),
+            wait: TaskWait {
+                current_wait: CpuLockCell(None),
+                wait_result: CpuLockCell(Ok(
+                    (),
+                )),
+            },
+            last_mutex_held: CpuLockCell(None),
+            park_token: CpuLockCell(false),
+        },
+        2: TaskCb {
+            self: 0x00000001086860b0,
+            port_task_state: TaskState {
+                tsm: TryLock {
+                    value: Running(
+                        ThreadId(
+                            PoolPtr(
+                                1,
+                            ),
+                        ),
+                    ),
+                },
+            },
+            attr: TaskAttr {
+                entry_point: 0x00000001082d8f20,
+                entry_param: 0,
+                stack: StackHunk(
+                    0x0000000108691e08,
+                ),
+                priority: 2,
+            },
+            base_priority: CpuLockCell(2),
+            effective_priority: CpuLockCell(0),
+            st: CpuLockCell(Waiting),
+            link: CpuLockCell(None),
+            wait: TaskWait {
+                current_wait: CpuLockCell(Some(
+                    Sleep,
+                )),
+                wait_result: CpuLockCell(Ok(
+                    (),
+                )),
+            },
+            last_mutex_held: CpuLockCell(Some(
+                0x0000000108686108,
+            )),
+            park_token: CpuLockCell(false),
+        },
+    },
+    event_group_cb_pool: {},
+    mutex_cb_pool: {
+        0: MutexCb {
+            self: 0x0000000108686108,
+            ceiling: Some(
+                0,
+            ),
+            inconsistent: CpuLockCell(false),
+            wait_queue: WaitQueue {
+                waits: [
+                    { task: 0x108686000, payload: Mutex(0x7000097860d0) },
+                ],
+                order: TaskPriority,
+            },
+            prev_mutex_held: CpuLockCell(None),
+            owning_task: CpuLockCell(Some(
+                0x00000001086860b0,
+            )),
+        },
+    },
+    semaphore_cb_pool: {},
+    timer_cb_pool: {},
+}
+</code></pre>
+</details>
+<h1 id="cargo-features" class="section-header"><a href="#cargo-features">Cargo Features</a></h1>
+<ul>
+<li><strong><code>chrono</code></strong>: Enables conversion between our <a href="../r3/time/struct.Duration.html">duration</a> and <a href="../r3/time/struct.Time.html">timetamp</a> types and <code>::chrono</code>’s types.</li>
+<li><strong><code>inline_syscall</code></strong>: Allows (but does not force) inlining for all application-facing methods. Enabling this feature might lower the latency of system calls but there are the following downsides: (1) The decision of inlining is driven by the compiler’s built-in heuristics, which takes many factors into consideration. Therefore, the performance improvement (or deterioration) varies unpredictably depending on the global structure of your application and the compiler version used, making it harder to design the system to meet real-time requirements. (2) Inlining increases the code working set size and can make the code run even slower. This is especially likely to happen on an execute-in-place (XIP) system with low-speed code memory such as an SPI flash.</li>
+</ul>
+<h2 id="kernel-features" class="section-header"><a href="#kernel-features">Kernel Features</a></h2>
+<p>Enabling the following features might affect the kernel’s runtime peformance and memory usage.</p>
+<ul>
+<li><strong><code>priority_boost</code></strong>: Enables <a href="#system-states">Priority Boost</a>.</li>
+<li><strong><code>system_time</code></strong>: Enables the tracking of a global system time.</li>
+</ul>
+<!--
+FIXME: Work-around for `svgbobdoc` not supporting `#[doc(include = ...)]`
+       or `rustdoc` not integrating `svgbob` yet ;)
+       Related: <https://github.com/ivanceras/svgbob/issues/26>
+
+```svgbob
+"::r3"                       : "::your_app"
+                             :
+                             : build!                   : use_port!
+                             :                          :
+  ,------------------,       :      ,-----------------, :
+  | trait KernelCfg1 |       :      | impl KernelCfg1 | :
+  '------------------'       :      '-----------------' :
+           ^                 :        ^       |         :
+           |                 :        |       v         :
+           |                 : ,------'  Config data ------------,
+           |                 : |              ^         :        v
+     ,------------,          : |              |         :  ,-----------,
+     | trait Port |          : +--------------+----------\> | impl Port |
+     '------------'          : |              |         :  '-----------'
+           ^                 : |              |         :        |
+           |                 : |              |         :        |
+  ,------------------,       : |    ,-----------------, :        |
+  | trait KernelCfg2 |       : |    | impl KernelCfg2 | :        |
+  '------------------'       : |    '-----------------' :        |
+           ^                 : |        ^       ^       :        |
+           |                 └╶|╶╶╶╶╶╶╶╶|╴╴╴╴╴╴╴|╴╴╴╴╴╴╴┘        |
+           |                   |  ,-----'       |   :            |
+           |                   |  |             |   :            |
+    ,--------------,  ,-------------,           |   :            |
+    | trait Kernel |  | impl Kernel | <---+-----+----------------'
+    '--------------'  '-------------'     |     |   :
+            ^                ^            |     '-------------,
+            |                |            |         :         |
+            |                |            v         : ,--------------,
+  ,--------------------, ,-------------------,    ,-- | Entry points |
+  | trait PortToKernel | | impl PortToKernel | <--' : '--------------'
+  '--------------------' '-------------------'      :
+```
+
+The following data URI was generated by processing the above text through `svgbobdoc`. Make sure to replace `\>` with `>`.
+-->
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script>
+<style type="text/css">.disabled-feature-warning { display: none; }</style></div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="hunk/index.html" title="r3::hunk mod">hunk</a></td><td class="docblock-short"><p>Type-safe hunks</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="kernel/index.html" title="r3::kernel mod">kernel</a></td><td class="docblock-short"><p>The RTOS kernel</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="prelude/index.html" title="r3::prelude mod">prelude</a></td><td class="docblock-short"><p>The prelude module.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="sync/index.html" title="r3::sync mod">sync</a></td><td class="docblock-short"><p>Safe synchronization primitives.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="time/index.html" title="r3::time mod">time</a></td><td class="docblock-short"><p>Temporal quantification for the R3 kernel.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="utils/index.html" title="r3::utils mod">utils</a></td><td class="docblock-short"><p>Utility</p>
+</td></tr></table><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.build.html" title="r3::build macro">build</a></td><td class="docblock-short"><p>Attach <a href="../r3/index.html#static-configuration">a configuration function</a> to a “system” type by implementing
+<a href="../r3/kernel/trait.KernelCfg2.html"><code>KernelCfg2</code></a>.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="r3" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

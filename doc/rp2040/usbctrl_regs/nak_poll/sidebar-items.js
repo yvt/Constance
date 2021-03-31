@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DELAY_FS_W","Write proxy for field `DELAY_FS`"],["DELAY_LS_W","Write proxy for field `DELAY_LS`"]],"type":[["DELAY_FS_R","Reader of field `DELAY_FS`"],["DELAY_LS_R","Reader of field `DELAY_LS`"],["R","Reader of register NAK_POLL"],["W","Writer for register NAK_POLL"]]});

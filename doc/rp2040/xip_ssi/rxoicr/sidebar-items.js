@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register RXOICR"],["RXOICR_R","Reader of field `RXOICR`"]]});

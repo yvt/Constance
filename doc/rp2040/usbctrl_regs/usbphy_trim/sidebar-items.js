@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DM_PULLDN_TRIM_W","Write proxy for field `DM_PULLDN_TRIM`"],["DP_PULLDN_TRIM_W","Write proxy for field `DP_PULLDN_TRIM`"]],"type":[["DM_PULLDN_TRIM_R","Reader of field `DM_PULLDN_TRIM`"],["DP_PULLDN_TRIM_R","Reader of field `DP_PULLDN_TRIM`"],["R","Reader of register USBPHY_TRIM"],["W","Writer for register USBPHY_TRIM"]]});

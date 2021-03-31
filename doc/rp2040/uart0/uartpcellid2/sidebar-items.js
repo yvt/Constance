@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register UARTPCELLID2"],["UARTPCELLID2_R","Reader of field `UARTPCELLID2`"]]});

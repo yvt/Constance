@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["open","Open a document."],["read","Read a document."],["save","Save a document."],["write","Write a document."]],"mod":[["node","The nodes."],["parser","The parser."]],"type":[["Document","A document."]]});

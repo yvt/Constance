@@ -1,0 +1,1223 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rp2040-0.1.0/src/clocks.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>clocks.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../rp2040/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">r&quot;Register block&quot;</span>]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RegisterBlock</span> {
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x00 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout0_ctrl</span>: <span class="ident">CLK_GPOUT0_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x04 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout0_div</span>: <span class="ident">CLK_GPOUT0_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x08 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout0_selected</span>: <span class="ident">CLK_GPOUT0_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x0c - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout1_ctrl</span>: <span class="ident">CLK_GPOUT1_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x10 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout1_div</span>: <span class="ident">CLK_GPOUT1_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x14 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout1_selected</span>: <span class="ident">CLK_GPOUT1_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x18 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout2_ctrl</span>: <span class="ident">CLK_GPOUT2_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x1c - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout2_div</span>: <span class="ident">CLK_GPOUT2_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x20 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout2_selected</span>: <span class="ident">CLK_GPOUT2_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x24 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout3_ctrl</span>: <span class="ident">CLK_GPOUT3_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x28 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout3_div</span>: <span class="ident">CLK_GPOUT3_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x2c - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_gpout3_selected</span>: <span class="ident">CLK_GPOUT3_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x30 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_ref_ctrl</span>: <span class="ident">CLK_REF_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x34 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_ref_div</span>: <span class="ident">CLK_REF_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x38 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_ref_selected</span>: <span class="ident">CLK_REF_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x3c - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_sys_ctrl</span>: <span class="ident">CLK_SYS_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x40 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_sys_div</span>: <span class="ident">CLK_SYS_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x44 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_sys_selected</span>: <span class="ident">CLK_SYS_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x48 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_peri_ctrl</span>: <span class="ident">CLK_PERI_CTRL</span>,
+    <span class="ident">_reserved19</span>: [<span class="ident">u8</span>; <span class="number">4usize</span>],
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x50 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_peri_selected</span>: <span class="ident">CLK_PERI_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x54 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_usb_ctrl</span>: <span class="ident">CLK_USB_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x58 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_usb_div</span>: <span class="ident">CLK_USB_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x5c - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_usb_selected</span>: <span class="ident">CLK_USB_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x60 - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_adc_ctrl</span>: <span class="ident">CLK_ADC_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x64 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_adc_div</span>: <span class="ident">CLK_ADC_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x68 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_adc_selected</span>: <span class="ident">CLK_ADC_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x6c - Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_rtc_ctrl</span>: <span class="ident">CLK_RTC_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x70 - Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_rtc_div</span>: <span class="ident">CLK_RTC_DIV</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x74 - Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_rtc_selected</span>: <span class="ident">CLK_RTC_SELECTED</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x78 - &quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_sys_resus_ctrl</span>: <span class="ident">CLK_SYS_RESUS_CTRL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x7c - &quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">clk_sys_resus_status</span>: <span class="ident">CLK_SYS_RESUS_STATUS</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x80 - Reference clock frequency in kHz&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_ref_khz</span>: <span class="ident">FC0_REF_KHZ</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x84 - Minimum pass frequency in kHz. This is optional. Set to 0 if you are not using the pass/fail flags&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_min_khz</span>: <span class="ident">FC0_MIN_KHZ</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x88 - Maximum pass frequency in kHz. This is optional. Set to 0x1ffffff if you are not using the pass/fail flags&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_max_khz</span>: <span class="ident">FC0_MAX_KHZ</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x8c - Delays the start of frequency counting to allow the mux to settle\\n Delay is measured in multiples of the reference clock period&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_delay</span>: <span class="ident">FC0_DELAY</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x90 - The test interval is 0.98us * 2**interval, but let&#39;s call it 1us * 2**interval\\n The default gives a test interval of 250us&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_interval</span>: <span class="ident">FC0_INTERVAL</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x94 - Clock sent to frequency counter, set to 0 when not required\\n Writing to this register initiates the frequency count&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_src</span>: <span class="ident">FC0_SRC</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x98 - Frequency counter status&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_status</span>: <span class="ident">FC0_STATUS</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0x9c - Result of frequency measurement, only valid when status_done=1&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">fc0_result</span>: <span class="ident">FC0_RESULT</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xa0 - enable clock in wake mode&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">wake_en0</span>: <span class="ident">WAKE_EN0</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xa4 - enable clock in wake mode&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">wake_en1</span>: <span class="ident">WAKE_EN1</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xa8 - enable clock in sleep mode&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">sleep_en0</span>: <span class="ident">SLEEP_EN0</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xac - enable clock in sleep mode&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">sleep_en1</span>: <span class="ident">SLEEP_EN1</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xb0 - indicates the state of the clock enable&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">enabled0</span>: <span class="ident">ENABLED0</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xb4 - indicates the state of the clock enable&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">enabled1</span>: <span class="ident">ENABLED1</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xb8 - Raw Interrupts&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">intr</span>: <span class="ident">INTR</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xbc - Interrupt Enable&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">inte</span>: <span class="ident">INTE</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xc0 - Interrupt Force&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">intf</span>: <span class="ident">INTF</span>,
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;0xc4 - Interrupt status after masking &amp; forcing&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="ident">ints</span>: <span class="ident">INTS</span>,
+}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout0_ctrl](clk_gpout0_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT0_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT0_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT0_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout0_ctrl::R](clk_gpout0_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT0_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout0_ctrl::W](clk_gpout0_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT0_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout0_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout0_div](clk_gpout0_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT0_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT0_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT0_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout0_div::R](clk_gpout0_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT0_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout0_div::W](clk_gpout0_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT0_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout0_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout0_selected](clk_gpout0_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT0_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT0_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT0_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout0_selected::R](clk_gpout0_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT0_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout0_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout1_ctrl](clk_gpout1_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT1_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT1_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT1_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout1_ctrl::R](clk_gpout1_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT1_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout1_ctrl::W](clk_gpout1_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT1_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout1_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout1_div](clk_gpout1_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT1_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT1_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT1_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout1_div::R](clk_gpout1_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT1_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout1_div::W](clk_gpout1_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT1_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout1_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout1_selected](clk_gpout1_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT1_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT1_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT1_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout1_selected::R](clk_gpout1_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT1_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout1_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout2_ctrl](clk_gpout2_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT2_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT2_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT2_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout2_ctrl::R](clk_gpout2_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT2_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout2_ctrl::W](clk_gpout2_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT2_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout2_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout2_div](clk_gpout2_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT2_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT2_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT2_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout2_div::R](clk_gpout2_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT2_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout2_div::W](clk_gpout2_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT2_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout2_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout2_selected](clk_gpout2_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT2_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT2_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT2_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout2_selected::R](clk_gpout2_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT2_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout2_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout3_ctrl](clk_gpout3_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT3_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT3_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT3_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout3_ctrl::R](clk_gpout3_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT3_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout3_ctrl::W](clk_gpout3_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT3_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout3_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout3_div](clk_gpout3_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT3_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT3_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT3_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout3_div::R](clk_gpout3_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT3_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_gpout3_div::W](clk_gpout3_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT3_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout3_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_gpout3_selected](clk_gpout3_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_GPOUT3_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_GPOUT3_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_GPOUT3_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_gpout3_selected::R](clk_gpout3_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_GPOUT3_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_gpout3_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_ref_ctrl](clk_ref_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_REF_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_REF_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_REF_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_ref_ctrl::R](clk_ref_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_REF_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_ref_ctrl::W](clk_ref_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_REF_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_ref_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_ref_div](clk_ref_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_REF_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_REF_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_REF_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_ref_div::R](clk_ref_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_REF_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_ref_div::W](clk_ref_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_REF_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_ref_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_ref_selected](clk_ref_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_REF_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_REF_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_REF_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_ref_selected::R](clk_ref_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_REF_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_ref_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_sys_ctrl](clk_sys_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_SYS_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_SYS_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_SYS_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_sys_ctrl::R](clk_sys_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_sys_ctrl::W](clk_sys_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_sys_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_sys_div](clk_sys_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_SYS_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_SYS_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_SYS_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_sys_div::R](clk_sys_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_sys_div::W](clk_sys_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_sys_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_sys_selected](clk_sys_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_SYS_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_SYS_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_SYS_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_sys_selected::R](clk_sys_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_sys_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_peri_ctrl](clk_peri_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_PERI_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_PERI_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_PERI_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_peri_ctrl::R](clk_peri_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_PERI_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_peri_ctrl::W](clk_peri_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_PERI_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_peri_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_peri_selected](clk_peri_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_PERI_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_PERI_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_PERI_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_peri_selected::R](clk_peri_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_PERI_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_peri_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_usb_ctrl](clk_usb_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_USB_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_USB_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_USB_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_usb_ctrl::R](clk_usb_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_USB_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_usb_ctrl::W](clk_usb_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_USB_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_usb_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_usb_div](clk_usb_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_USB_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_USB_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_USB_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_usb_div::R](clk_usb_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_USB_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_usb_div::W](clk_usb_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_USB_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_usb_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_usb_selected](clk_usb_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_USB_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_USB_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_USB_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_usb_selected::R](clk_usb_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_USB_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_usb_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_adc_ctrl](clk_adc_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_ADC_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_ADC_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_ADC_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_adc_ctrl::R](clk_adc_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_ADC_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_adc_ctrl::W](clk_adc_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_ADC_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_adc_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_adc_div](clk_adc_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_ADC_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_ADC_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_ADC_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_adc_div::R](clk_adc_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_ADC_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_adc_div::W](clk_adc_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_ADC_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_adc_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_adc_selected](clk_adc_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_ADC_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_ADC_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_ADC_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_adc_selected::R](clk_adc_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_ADC_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_adc_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_rtc_ctrl](clk_rtc_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_RTC_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_RTC_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_RTC_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_rtc_ctrl::R](clk_rtc_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_RTC_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_rtc_ctrl::W](clk_rtc_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_RTC_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock control, can be changed on-the-fly (except for auxsrc)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_rtc_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_rtc_div](clk_rtc_div) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_RTC_DIV</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_RTC_DIV</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_RTC_DIV</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_rtc_div::R](clk_rtc_div::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_RTC_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_rtc_div::W](clk_rtc_div::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_RTC_DIV</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock divisor, can be changed on-the-fly&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_rtc_div</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_rtc_selected](clk_rtc_selected) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_RTC_SELECTED</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_RTC_SELECTED</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_RTC_SELECTED</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_rtc_selected::R](clk_rtc_selected::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_RTC_SELECTED</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Indicates which src is currently selected (one-hot)&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_rtc_selected</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_sys_resus_ctrl](clk_sys_resus_ctrl) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_SYS_RESUS_CTRL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_SYS_RESUS_CTRL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_SYS_RESUS_CTRL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_sys_resus_ctrl::R](clk_sys_resus_ctrl::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_RESUS_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [clk_sys_resus_ctrl::W](clk_sys_resus_ctrl::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_RESUS_CTRL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_sys_resus_ctrl</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [clk_sys_resus_status](clk_sys_resus_status) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CLK_SYS_RESUS_STATUS</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_CLK_SYS_RESUS_STATUS</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_CLK_SYS_RESUS_STATUS</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [clk_sys_resus_status::R](clk_sys_resus_status::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">CLK_SYS_RESUS_STATUS</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">clk_sys_resus_status</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Reference clock frequency in kHz\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_ref_khz](fc0_ref_khz) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_REF_KHZ</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_REF_KHZ</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_REF_KHZ</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_ref_khz::R](fc0_ref_khz::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_REF_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_ref_khz::W](fc0_ref_khz::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_REF_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Reference clock frequency in kHz&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_ref_khz</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Minimum pass frequency in kHz. This is optional. Set to 0 if you are not using the pass/fail flags\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_min_khz](fc0_min_khz) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_MIN_KHZ</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_MIN_KHZ</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_MIN_KHZ</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_min_khz::R](fc0_min_khz::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_MIN_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_min_khz::W](fc0_min_khz::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_MIN_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Minimum pass frequency in kHz. This is optional. Set to 0 if you are not using the pass/fail flags&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_min_khz</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Maximum pass frequency in kHz. This is optional. Set to 0x1ffffff if you are not using the pass/fail flags\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_max_khz](fc0_max_khz) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_MAX_KHZ</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_MAX_KHZ</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_MAX_KHZ</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_max_khz::R](fc0_max_khz::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_MAX_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_max_khz::W](fc0_max_khz::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_MAX_KHZ</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Maximum pass frequency in kHz. This is optional. Set to 0x1ffffff if you are not using the pass/fail flags&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_max_khz</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Delays the start of frequency counting to allow the mux to settle\\n Delay is measured in multiples of the reference clock period\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_delay](fc0_delay) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_DELAY</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_DELAY</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_DELAY</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_delay::R](fc0_delay::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_DELAY</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_delay::W](fc0_delay::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_DELAY</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Delays the start of frequency counting to allow the mux to settle\\n Delay is measured in multiples of the reference clock period&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_delay</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;The test interval is 0.98us * 2**interval, but let&#39;s call it 1us * 2**interval\\n The default gives a test interval of 250us\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_interval](fc0_interval) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_INTERVAL</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_INTERVAL</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_INTERVAL</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_interval::R](fc0_interval::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_INTERVAL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_interval::W](fc0_interval::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_INTERVAL</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;The test interval is 0.98us * 2**interval, but let&#39;s call it 1us * 2**interval\\n The default gives a test interval of 250us&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_interval</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock sent to frequency counter, set to 0 when not required\\n Writing to this register initiates the frequency count\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_src](fc0_src) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_SRC</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_SRC</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_SRC</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_src::R](fc0_src::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_SRC</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [fc0_src::W](fc0_src::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">FC0_SRC</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Clock sent to frequency counter, set to 0 when not required\\n Writing to this register initiates the frequency count&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_src</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Frequency counter status\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_status](fc0_status) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_STATUS</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_STATUS</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_STATUS</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_status::R](fc0_status::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_STATUS</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Frequency counter status&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_status</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Result of frequency measurement, only valid when status_done=1\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [fc0_result](fc0_result) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FC0_RESULT</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_FC0_RESULT</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_FC0_RESULT</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [fc0_result::R](fc0_result::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">FC0_RESULT</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Result of frequency measurement, only valid when status_done=1&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fc0_result</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in wake mode\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [wake_en0](wake_en0) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">WAKE_EN0</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_WAKE_EN0</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_WAKE_EN0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [wake_en0::R](wake_en0::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">WAKE_EN0</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [wake_en0::W](wake_en0::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">WAKE_EN0</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in wake mode&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">wake_en0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in wake mode\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [wake_en1](wake_en1) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">WAKE_EN1</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_WAKE_EN1</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_WAKE_EN1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [wake_en1::R](wake_en1::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">WAKE_EN1</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [wake_en1::W](wake_en1::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">WAKE_EN1</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in wake mode&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">wake_en1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in sleep mode\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [sleep_en0](sleep_en0) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SLEEP_EN0</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_SLEEP_EN0</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_SLEEP_EN0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [sleep_en0::R](sleep_en0::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">SLEEP_EN0</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [sleep_en0::W](sleep_en0::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">SLEEP_EN0</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in sleep mode&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sleep_en0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in sleep mode\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [sleep_en1](sleep_en1) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SLEEP_EN1</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_SLEEP_EN1</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_SLEEP_EN1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [sleep_en1::R](sleep_en1::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">SLEEP_EN1</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [sleep_en1::W](sleep_en1::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">SLEEP_EN1</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;enable clock in sleep mode&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sleep_en1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;indicates the state of the clock enable\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [enabled0](enabled0) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ENABLED0</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_ENABLED0</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_ENABLED0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [enabled0::R](enabled0::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">ENABLED0</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;indicates the state of the clock enable&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">enabled0</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;indicates the state of the clock enable\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [enabled1](enabled1) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ENABLED1</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_ENABLED1</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_ENABLED1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [enabled1::R](enabled1::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">ENABLED1</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;indicates the state of the clock enable&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">enabled1</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Raw Interrupts\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [intr](intr) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">INTR</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_INTR</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_INTR</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [intr::R](intr::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">INTR</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Raw Interrupts&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">intr</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt Enable\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [inte](inte) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">INTE</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_INTE</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_INTE</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [inte::R](inte::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">INTE</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [inte::W](inte::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">INTE</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt Enable&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">inte</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt Force\n\nThis register you can [`read`](crate::generic::Reg::read), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [intf](intf) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">INTF</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_INTF</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_INTF</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [intf::R](intf::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">INTF</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`write(|w| ..)` method takes [intf::W](intf::W) writer structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Writable</span> <span class="kw">for</span> <span class="ident">INTF</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt Force&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">intf</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt status after masking &amp; forcing\n\nThis register you can [`read`](crate::generic::Reg::read). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [ints](ints) module&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">INTS</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="ident">Reg</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">_INTS</span><span class="op">&gt;</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">_INTS</span>;
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;`read()` method returns [ints::R](ints::R) reader structure&quot;</span>]</span>
+<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">Readable</span> <span class="kw">for</span> <span class="ident">INTS</span> {}
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Interrupt status after masking &amp; forcing&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ints</span>;
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rp2040" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

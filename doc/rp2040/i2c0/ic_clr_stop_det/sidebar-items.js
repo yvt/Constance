@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CLR_STOP_DET_R","Reader of field `CLR_STOP_DET`"],["R","Reader of register IC_CLR_STOP_DET"]]});

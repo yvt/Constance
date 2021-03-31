@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DOTW_R","Reader of field `DOTW`"],["HOUR_R","Reader of field `HOUR`"],["MIN_R","Reader of field `MIN`"],["R","Reader of register RTC_0"],["SEC_R","Reader of field `SEC`"]]});

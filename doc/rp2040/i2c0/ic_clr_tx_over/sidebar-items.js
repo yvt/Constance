@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CLR_TX_OVER_R","Reader of field `CLR_TX_OVER`"],["R","Reader of register IC_CLR_TX_OVER"]]});

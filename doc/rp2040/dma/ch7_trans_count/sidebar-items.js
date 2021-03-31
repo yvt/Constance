@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register CH7_TRANS_COUNT"],["W","Writer for register CH7_TRANS_COUNT"]]});

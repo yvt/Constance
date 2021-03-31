@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register SSPMIS"],["RORMIS_R","Reader of field `RORMIS`"],["RTMIS_R","Reader of field `RTMIS`"],["RXMIS_R","Reader of field `RXMIS`"],["TXMIS_R","Reader of field `TXMIS`"]]});

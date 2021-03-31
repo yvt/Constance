@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["REGION_W","Write proxy for field `REGION`"]],"type":[["R","Reader of register MPU_RNR"],["REGION_R","Reader of field `REGION`"],["W","Writer for register MPU_RNR"]]});

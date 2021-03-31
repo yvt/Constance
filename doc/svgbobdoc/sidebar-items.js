@@ -1,0 +1,1 @@
+initSidebarItems({"attr":[["transform","Render ASCII-diagram code blocks in doc comments as SVG images."]]});

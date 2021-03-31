@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TFT_W","Write proxy for field `TFT`"]],"type":[["R","Reader of register TXFTLR"],["TFT_R","Reader of field `TFT`"],["W","Writer for register TXFTLR"]]});

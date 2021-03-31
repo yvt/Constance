@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["transmute","Similar to `core::mem::transmute` except that `T` and `U` are not required to be the same size."],["uninit_array","Construct a `[MaybeUninit<T>; LEN]` whose elements are uninitialized."]]});

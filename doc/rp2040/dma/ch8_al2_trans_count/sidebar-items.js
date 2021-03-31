@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register CH8_AL2_TRANS_COUNT"]]});

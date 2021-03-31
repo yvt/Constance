@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TDE_W","Write proxy for field `TDE`"]],"type":[["R","Reader of register TXD_DRIVE_EDGE"],["TDE_R","Reader of field `TDE`"],["W","Writer for register TXD_DRIVE_EDGE"]]});

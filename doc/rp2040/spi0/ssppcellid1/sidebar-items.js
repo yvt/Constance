@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register SSPPCELLID1"],["SSPPCELLID1_R","Reader of field `SSPPCELLID1`"]]});

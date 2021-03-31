@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EP0_IN_W","Write proxy for field `EP0_IN`"],["EP0_OUT_W","Write proxy for field `EP0_OUT`"]],"type":[["EP0_IN_R","Reader of field `EP0_IN`"],["EP0_OUT_R","Reader of field `EP0_OUT`"],["R","Reader of register EP_STALL_ARM"],["W","Writer for register EP_STALL_ARM"]]});

@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Simulator for running [`::r3`] on a hosted environment"><meta name="keywords" content="rust, rustlang, rust-lang, r3_port_std"><title>r3_port_std - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../r3_port_std/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate r3_port_std</p><div class="block version"><p>Version 0.1.1</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all r3_port_std's items</p></a><div class="block items"><ul><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#constants">Constants</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="r3_port_std" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">r3_port_std</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/r3_port_std/lib.rs.html#1-836" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Simulator for running <a href="../r3/index.html" title="::r3"><code>::r3</code></a> on a hosted environment</p>
+<h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">const_fn</span>)]</span>
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">const_mut_refs</span>)]</span>
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">const_fn_fn_ptr_basics</span>)]</span>
+
+<span class="comment">// Require `unsafe` even in `unsafe fn` - highly recommended</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">unsafe_op_in_unsafe_fn</span>)]</span>
+
+<span class="kw">use</span> <span class="ident">r3</span>::<span class="ident">kernel</span>::{<span class="ident">Task</span>, <span class="ident">cfg</span>::<span class="ident">CfgBuilder</span>};
+
+<span class="comment">// Use the simulator port. This macro generates `fn main()`.</span>
+<span class="ident">r3_port_std</span>::<span class="macro">use_port</span><span class="macro">!</span>(<span class="kw">unsafe</span> <span class="kw">struct</span> <span class="ident">System</span>);
+
+<span class="kw">const</span> <span class="ident">COTTAGE</span>: () <span class="op">=</span> <span class="ident">r3</span>::<span class="macro">build</span><span class="macro">!</span>(<span class="ident">System</span>, <span class="ident">configure_app</span> <span class="op">=</span><span class="op">&gt;</span> ());
+
+<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">configure_app</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">CfgBuilder</span><span class="op">&lt;</span><span class="ident">System</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> () {
+    <span class="ident">Task</span>::<span class="ident">build</span>()
+        .<span class="ident">start</span>(<span class="ident">task_body</span>)
+        .<span class="ident">priority</span>(<span class="number">1</span>)
+        .<span class="ident">active</span>(<span class="bool-val">true</span>)
+        .<span class="ident">finish</span>(<span class="ident">b</span>);
+}
+
+<span class="kw">fn</span> <span class="ident">task_body</span>(<span class="kw">_</span>: <span class="ident">usize</span>) {
+    <span class="comment">// The simulator initializes `env_logger` automatically</span>
+    <span class="ident">log</span>::<span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;yay&quot;</span>);
+}
+</pre></div>
+<h1 id="interrupts" class="section-header"><a href="#interrupts">Interrupts</a></h1>
+<p>This port fully supports <a href="../r3/index.html#interrupt-handling-framework">the standard interrupt handling framework</a>.</p>
+<ul>
+<li>The full range of priority values is available. The default priority is <code>0</code>.</li>
+<li>The simulated hardware exposes <code>1024</code> (= <a href="../r3_port_std/constant.NUM_INTERRUPT_LINES.html"><code>NUM_INTERRUPT_LINES</code></a>) interrupt
+lines.</li>
+<li>Smaller priority values are prioritized.</li>
+<li>Negative priority values are considered unmanaged.</li>
+</ul>
+<h2 id="implementation" class="section-header"><a href="#implementation">Implementation</a></h2>
+<p>Based on the internal user-mode scheduling (UMS) framework, we treat interrupt handlers as UMS worker threads, just like tasks. The user-mode scheduler manages active interrupt threads and favors them over other kinds of threads. (In contrast, the scheduler doesn’t manage tasks - it only knows which task is currently chosen by the operating system.)</p>
+<p>The interrupt line <a href="../r3_port_std/constant.INTERRUPT_LINE_DISPATCH.html"><code>INTERRUPT_LINE_DISPATCH</code></a> is reserved for the dispatcher.</p>
+<h1 id="preemption-and-host-environment" class="section-header"><a href="#preemption-and-host-environment">Preemption and Host Environment</a></h1>
+<p>The user-mode scheduling scheme may interact poorly with other components or the host operating system. Preemption is implemented by signals on POSIX platforms and can cause system calls to fail with an error code that <code>libstd</code> is not prepared to deal with. Also, sharing an external resource between threads is prone to a deadlock. Here’s an example: Suppose an application uses an allocator whose internal structure is protected by a host mutex. Task A acquires a lock, but then gets preempted by task B, which also attempts to acquire a lock. The guest operating system is unaware of the existence of such resources and keeps scheduling task B (not knowing that completing task A would unblock task B), leading to a deadlock.</p>
+<p><strong>This means that even using the default (system) global allocator inside a guest environment can cause a deadlock.</strong></p>
+<p>There are several ways to tackle these problems:</p>
+<ul>
+<li>
+<p>Lock the scheduler structure by calling <a href="../r3_port_std/fn.lock_scheduler.html"><code>lock_scheduler</code></a>.</p>
+<p><strong>Con:</strong> You need to be careful not to call any guest operating services while the lock is being held.</p>
+</li>
+<li>
+<p>Activate <a href="../r3/kernel/trait.Kernel.html#tymethod.acquire_cpu_lock">CPU Lock</a> while accessing external resources.</p>
+<p><strong>Con:</strong> CPU Lock doesn’t affect unmanaged interrupt handlers. Many guest operating services are unavailable while CPU Lock is being held.</p>
+</li>
+<li>
+<p>Activate <a href="r3::kernel::Kernel::boost_priority">Priority Boost</a> while accessing external resources.</p>
+<p><strong>Con:</strong> Priority Boost doesn’t affect and can’t be used in interrupt handlers.</p>
+</li>
+<li>
+<p>Create a mutex using the guest operating system’s feature and use it to ensure only one task can access a particular external resource at a time.</p>
+<p><strong>Con:</strong> Interrupt handlers can’t perform a blocking operation. Interrupts can still preempt host system calls.</p>
+</li>
+<li>
+<p>Create an asynchronous RPC channel.</p>
+<p><strong>Con:</strong> Complicated and requires allocation of system-global resources such as an interrupt line for inbound signaling.</p>
+</li>
+</ul>
+</div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.use_port.html" title="r3_port_std::use_port macro">use_port</a></td><td class="docblock-short"></td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.TaskState.html" title="r3_port_std::TaskState struct">TaskState</a></td><td class="docblock-short"></td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_LINE_DISPATCH.html" title="r3_port_std::INTERRUPT_LINE_DISPATCH constant">INTERRUPT_LINE_DISPATCH</a></td><td class="docblock-short"><p>The (software) interrupt line used for dispatching.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_LINE_TIMER.html" title="r3_port_std::INTERRUPT_LINE_TIMER constant">INTERRUPT_LINE_TIMER</a></td><td class="docblock-short"><p>The (software) interrupt line used for timer interrupts.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_PRIORITY_DISPATCH.html" title="r3_port_std::INTERRUPT_PRIORITY_DISPATCH constant">INTERRUPT_PRIORITY_DISPATCH</a></td><td class="docblock-short"><p>The default interrupt priority for <a href="../r3_port_std/constant.INTERRUPT_LINE_DISPATCH.html" title="INTERRUPT_LINE_DISPATCH"><code>INTERRUPT_LINE_DISPATCH</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.INTERRUPT_PRIORITY_TIMER.html" title="r3_port_std::INTERRUPT_PRIORITY_TIMER constant">INTERRUPT_PRIORITY_TIMER</a></td><td class="docblock-short"><p>The default interrupt priority for <a href="../r3_port_std/constant.INTERRUPT_LINE_TIMER.html" title="INTERRUPT_LINE_TIMER"><code>INTERRUPT_LINE_TIMER</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.NUM_INTERRUPT_LINES.html" title="r3_port_std::NUM_INTERRUPT_LINES constant">NUM_INTERRUPT_LINES</a></td><td class="docblock-short"><p>The number of interrupt lines. The valid range of interrupt numbers is
+defined as <code>0..NUM_INTERRUPT_LINES</code></p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.lock_scheduler.html" title="r3_port_std::lock_scheduler fn">lock_scheduler</a></td><td class="docblock-short"><p>Temporarily lock the scheduler, disabling preemption.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.pend_interrupt_line.html" title="r3_port_std::pend_interrupt_line fn">pend_interrupt_line</a></td><td class="docblock-short"><p>Pend an interrupt line from an external thread.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.shutdown.html" title="r3_port_std::shutdown fn">shutdown</a></td><td class="docblock-short"><p>Initiate graceful shutdown.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="r3_port_std" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

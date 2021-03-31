@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["ALARM_0_R","Reader of field `ALARM_0`"],["ALARM_1_R","Reader of field `ALARM_1`"],["ALARM_2_R","Reader of field `ALARM_2`"],["ALARM_3_R","Reader of field `ALARM_3`"],["R","Reader of register INTS"]]});

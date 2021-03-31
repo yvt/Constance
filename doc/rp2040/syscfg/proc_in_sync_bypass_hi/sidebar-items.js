@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PROC_IN_SYNC_BYPASS_HI_W","Write proxy for field `PROC_IN_SYNC_BYPASS_HI`"]],"type":[["PROC_IN_SYNC_BYPASS_HI_R","Reader of field `PROC_IN_SYNC_BYPASS_HI`"],["R","Reader of register PROC_IN_SYNC_BYPASS_HI"],["W","Writer for register PROC_IN_SYNC_BYPASS_HI"]]});

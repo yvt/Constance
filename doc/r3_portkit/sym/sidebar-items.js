@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["sym_static","Coerce a value into [`SymStatic`]."]],"macro":[["sym_static","Define a `fn` item actually representing a `static` variable."]],"trait":[["SymStaticExt",""]],"type":[["SymStatic","Represents a value of `&'static T`. The functions of this type are defined by [`sym_static!`]."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CLRENA_W","Write proxy for field `CLRENA`"]],"type":[["CLRENA_R","Reader of field `CLRENA`"],["R","Reader of register NVIC_ICER"],["W","Writer for register NVIC_ICER"]]});

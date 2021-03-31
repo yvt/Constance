@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Event","An event."]],"struct":[["Error","An error."],["Parser","A parser."]],"type":[["Result","A result."]]});

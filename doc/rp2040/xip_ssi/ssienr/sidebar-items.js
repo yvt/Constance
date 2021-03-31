@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SSI_EN_W","Write proxy for field `SSI_EN`"]],"type":[["R","Reader of register SSIENR"],["SSI_EN_R","Reader of field `SSI_EN`"],["W","Writer for register SSIENR"]]});

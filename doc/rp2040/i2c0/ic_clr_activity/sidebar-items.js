@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CLR_ACTIVITY_R","Reader of field `CLR_ACTIVITY`"],["R","Reader of register IC_CLR_ACTIVITY"]]});

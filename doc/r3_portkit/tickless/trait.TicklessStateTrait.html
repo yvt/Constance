@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Operations implemented by all valid instantiations of [`TicklessState`]."><meta name="keywords" content="rust, rustlang, rust-lang, TicklessStateTrait"><title>r3_portkit::tickless::TicklessStateTrait - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc trait"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../r3_portkit/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Trait TicklessStateTrait</p><div class="sidebar-elems"><div class="block items"><a class="sidebar-title" href="#required-methods">Required Methods</a><div class="sidebar-links"><a href="#tymethod.tick_count">tick_count</a><a href="#tymethod.reset">reset</a><a href="#tymethod.mark_reference">mark_reference</a><a href="#tymethod.tick_count_to_hw_tick_count">tick_count_to_hw_tick_count</a></div><a class="sidebar-title" href="#provided-methods">Provided Methods</a><div class="sidebar-links"><a href="#method.mark_reference_and_measure">mark_reference_and_measure</a></div><a class="sidebar-title" href="#implementors">Implementors</a></div><p class="location"><a href="../index.html">r3_portkit</a>::<wbr><a href="index.html">tickless</a></p><div id="sidebar-vars" data-name="TicklessStateTrait" data-ty="trait" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Trait <a href="../index.html">r3_portkit</a>::<wbr><a href="index.html">tickless</a>::<wbr><a class="trait" href="">TicklessStateTrait</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#395-589" title="goto source code">[src]</a></span></h1><div class="docblock type-decl hidden-by-usual-hider"><pre class="rust trait">pub trait TicklessStateTrait: <a class="trait" href="../../r3/utils/init/trait.Init.html" title="trait r3::utils::init::Init">Init</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> {
+    fn <a href="#tymethod.reset" class="fnname">reset</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32);
+<div class="item-spacer"></div>    fn <a href="#tymethod.mark_reference" class="fnname">mark_reference</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32;
+<div class="item-spacer"></div>    fn <a href="#tymethod.tick_count_to_hw_tick_count" class="fnname">tick_count_to_hw_tick_count</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;self, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tick_count: u32<br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; u32;
+<div class="item-spacer"></div>    fn <a href="#tymethod.tick_count" class="fnname">tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32;
+
+    fn <a href="#method.mark_reference_and_measure" class="fnname">mark_reference_and_measure</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hw_tick_count: u32, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ticks: u32<br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="struct" href="../../r3_portkit/tickless/struct.Measurement.html" title="struct r3_portkit::tickless::Measurement">Measurement</a> { ... }
+}</pre></div><div class="docblock"><p>Operations implemented by all valid instantiations of <a href="../../r3_portkit/tickless/type.TicklessState.html" title="TicklessState"><code>TicklessState</code></a>.</p>
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script></div><h2 id="required-methods" class="small-section-header">Required methods<a href="#required-methods" class="anchor"></a></h2><div class="methods"><h3 id="tymethod.reset" class="method"><code>fn <a href="#tymethod.reset" class="fnname">reset</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32)</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#404" title="goto source code">[src]</a></h3><div class="docblock"><p>Mark the given hardware tick count as the origin (where
+OS tick count is exactly zero).</p>
+<p>To use this method, <a href="../../r3_portkit/tickless/struct.TicklessOptions.html#structfield.resettable" title="TicklessOptions::resettable"><code>TicklessOptions::resettable</code></a> must be set to
+<code>true</code> when constructing <a href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="TicklessCfg"><code>TicklessCfg</code></a>.</p>
+<p><code>self</code> must be in the initial state (<code>Init::INIT</code>) when this method is
+called.</p>
+</div><h3 id="tymethod.mark_reference" class="method"><code>fn <a href="#tymethod.mark_reference" class="fnname">mark_reference</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#424" title="goto source code">[src]</a></h3><div class="docblock"><p>Mark a reference point. Returns the reference point’s OS tick count
+(in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_tick_count"><code>max_tick_count</code></a><code>()</code>).</p>
+<p><code>hw_tick_count</code> should be in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.hw_max_tick_count"><code>hw_max_tick_count</code></a><code>()</code>
+and satisfy the requirements of <a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.tick_count" title="TicklessStateTrait::tick_count"><code>TicklessStateTrait::tick_count</code></a>.</p>
+<p>All reference points are exactly aligned to OS ticks (microseconds).</p>
+<p>The client should call this method periodically for a correct behavior.
+The client should use the <a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.tick_count_to_hw_tick_count" title="Self::tick_count_to_hw_tick_count"><code>Self::tick_count_to_hw_tick_count</code></a> method
+to determine the next hardware tick count to mark the next reference
+point on.</p>
+<p><code>cfg</code> must be the instance of <a href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="TicklessCfg"><code>TicklessCfg</code></a> that was passed to
+<a href="../../r3_portkit/tickless/type.TicklessState.html" title="TicklessState"><code>TicklessState</code></a> to derive <code>Self</code>.</p>
+</div><h3 id="tymethod.tick_count_to_hw_tick_count" class="method"><code>fn <a href="#tymethod.tick_count_to_hw_tick_count" class="fnname">tick_count_to_hw_tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#531" title="goto source code">[src]</a></h3><div class="docblock"><p>Calculate the earliest hardware tick count representing a point of time
+that coincides or follows the one represented by the specified OS tick
+count.</p>
+<p>Returns a value in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.hw_max_tick_count"><code>hw_max_tick_count</code></a><code>()</code>.</p>
+<p><code>tick_count</code> must satisfy the following condition: Given a last
+reference point <code>ref_tick_count</code> (a value returned by
+<a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.mark_reference"><code>mark_reference</code></a>), there must exist <code>i</code> such that
+<code>i ∈ 1..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_timeout"><code>max_timeout</code></a><code>()</code> and <code>tick_count == (ref_tick_count + i) % (cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_tick_count"><code>max_tick_count</code></a><code>() + 1)</code>.</p>
+<p>In particular, <code>tick_count</code> must not be identical to <code>ref_tick_count</code>.
+If this was allowed, the result could refer to the past. Consider the
+following diagram. In this case, <code>mark_reference</code> is called at the 6th
+hardware tick, creating a reference point at time 2μs. Now if you call
+<code>tick_count_to_hw_tick_count</code> with <code>tick_count = 2</code>, the returned value
+will refer to the 5th hardware tick, which is in the past. Because of
+wrap-around arithmetics, it’s impossible to tell if the returned value
+refers to the past or not.</p>
+<center>
+<p><img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iYm9iIiBmb250LWZhbWlseT0iJ1NvdXJjZSBDb2RlIFBybycsJ0FuZGFsZSBNb25vJywnU2Vnb2UgVUkgTW9ubycsJ0RlamF2dSBTYW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNCIgaGVpZ2h0PSIxOTIiIHdpZHRoPSI0NTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bWFya2VyIGlkPSJ0cmlhbmdsZSIgbWFya2VySGVpZ2h0PSI4IiBtYXJrZXJXaWR0aD0iOCIgb3JpZW50PSJhdXRvIiByZWZYPSI0IiByZWZZPSIyIiB2aWV3Qm94PSIwIDAgOCA0Ij4KPHBvbHlnb24gY2xhc3M9ImZnX2ZpbGwiIHBvaW50cz0iMCwwIDAsNCA4LDIgMCwwIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjbGVhcl90cmlhbmdsZSIgbWFya2VySGVpZ2h0PSIxMCIgbWFya2VyV2lkdGg9IjEwIiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEiIHJlZlk9IjciIHZpZXdCb3g9IjAgMCAyMCAxNCI+Cjxwb2x5Z29uIGNsYXNzPSJiZ19maWxsIiBwb2ludHM9IjIsMiAyLDEyIDE4LDcgMiwyIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjaXJjbGUiIG1hcmtlckhlaWdodD0iNSIgbWFya2VyV2lkdGg9IjUiIG9yaWVudD0iYXV0byIgcmVmWD0iMTAiIHJlZlk9IjEwIiB2aWV3Qm94PSIwIDAgMjAgMjAiPgo8Y2lyY2xlIGNsYXNzPSJmZ19maWxsIiBjeD0iMTAiIGN5PSIxMCIgcj0iOCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ic3F1YXJlIiBtYXJrZXJIZWlnaHQ9IjUiIG1hcmtlcldpZHRoPSI1IiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEwIiByZWZZPSIxMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KPHJlY3QgY2xhc3M9ImZnX2ZpbGwiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgeD0iMCIgeT0iMCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ib3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMTAiIG1hcmtlcldpZHRoPSIxMCIgb3JpZW50PSJhdXRvIiByZWZYPSIxMCIgcmVmWT0iMTAiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIxMCIgY3k9IjEwIiByPSI0Ii8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJiaWdfb3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMjAiIG1hcmtlcldpZHRoPSIyMCIgb3JpZW50PSJhdXRvIiByZWZYPSIyMCIgcmVmWT0iMjAiIHZpZXdCb3g9IjAgMCA0MCA0MCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIyMCIgY3k9IjIwIiByPSI2Ii8+CjwvbWFya2VyPgo8L2RlZnM+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgpyZWN0LmJhY2tkcm9wIHsKICAgIGZpbGw6IHdoaXRlOwp9CnRleHR7CiAgICBmaWxsOiBibGFjazsKfQoKY2lyY2xlIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9CgpsaW5lIHsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCnBhdGggewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCmxpbmUuZGFzaGVkIHsKICAgIHN0cm9rZS1kYXNoYXJyYXk6IDU7Cn0KCi5mZ19maWxsIHsKICAgIGZpbGw6IGJsYWNrOwp9CgoKLmJnX2ZpbGwgewogICAgZmlsbDogd2hpdGU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9Cgp0c3Bhbi5oZWFkewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKfQogICAgCjwvc3R5bGU+CjxyZWN0IGNsYXNzPSJiYWNrZHJvcCIgaGVpZ2h0PSIxOTIiIHdpZHRoPSI0NTYiIHg9IjAiIHk9IjAiLz4KPGc+CjxsaW5lIHgxPSIxMDgiIHgyPSIxMDgiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIxMDgiIHgyPSIxMzIiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIxMzIiIHgyPSIxMzIiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIxMzIiIHgyPSIxNTYiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIxNTYiIHgyPSIxNTYiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIxNTYiIHgyPSIxODAiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIxODAiIHgyPSIxODAiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIxODAiIHgyPSIyMDQiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIyMDQiIHgyPSIyMDQiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIyMDQiIHgyPSIyMjgiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIyMjgiIHgyPSIyMjgiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIyMjgiIHgyPSIyNTIiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNTIiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNzYiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIyNzYiIHgyPSIyNzYiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIyNzYiIHgyPSIzMDAiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIzMDAiIHgyPSIzMDAiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIzMDAiIHgyPSIzMjQiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIzMjQiIHgyPSIzMjQiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIzMjQiIHgyPSIzNDgiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIzNDgiIHgyPSIzNDgiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIzNDgiIHgyPSIzNzIiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIzNzIiIHgyPSIzNzIiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIzNzIiIHgyPSIzOTYiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIzOTYiIHgyPSIzOTYiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSIzOTYiIHgyPSI0MjAiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSI0MjAiIHgyPSI0MjAiIHkxPSI3MiIgeTI9IjgwIi8+CjxsaW5lIHgxPSI0MjAiIHgyPSI0NDQiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSI0NDQiIHgyPSI0NDQiIHkxPSI3MiIgeTI9IjgwIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxMDgiIHgyPSIxMDgiIHkxPSIxMzYiIHkyPSIxNDQiLz4KPGxpbmUgeDE9IjEwOCIgeDI9IjE2NCIgeTE9IjEzNiIgeTI9IjEzNiIvPgo8bGluZSB4MT0iMTY0IiB4Mj0iMTY0IiB5MT0iMTM2IiB5Mj0iMTQ0Ii8+CjxsaW5lIHgxPSIxNjQiIHgyPSIyMjAiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPGxpbmUgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjEzNiIgeTI9IjE0NCIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjc2IiB5MT0iMTM2IiB5Mj0iMTM2Ii8+CjxsaW5lIHgxPSIyNzYiIHgyPSIyNzYiIHkxPSIxMzYiIHkyPSIxNDQiLz4KPGxpbmUgeDE9IjI3NiIgeDI9IjMzMiIgeTE9IjEzNiIgeTI9IjEzNiIvPgo8bGluZSB4MT0iMzMyIiB4Mj0iMzMyIiB5MT0iMTM2IiB5Mj0iMTQ0Ii8+CjxsaW5lIHgxPSIzMzIiIHgyPSIzODgiIHkxPSIxMzYiIHkyPSIxMzYiLz4KPGxpbmUgeDE9IjM4OCIgeDI9IjM4OCIgeTE9IjEzNiIgeTI9IjE0NCIvPgo8bGluZSB4MT0iMzg4IiB4Mj0iNDQ0IiB5MT0iMTM2IiB5Mj0iMTM2Ii8+CjxsaW5lIHgxPSI0NDQiIHgyPSI0NDQiIHkxPSIxMzYiIHkyPSIxNDQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjEwNCIgeTI9IjExNiIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjUyIiB5MT0iMTA0IiB5Mj0iMTA0Ii8+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNTIiIHkxPSI5MiIgeTI9IjEwNCIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjE2MCIgeTI9IjE0OCIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjIwIiB5MT0iMTYwIiB5Mj0iMTc2Ii8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMjUyIiB4Mj0iMjUyIiB5MT0iMzIiIHkyPSI2MCIvPgo8L2c+CjxnPgo8dGV4dCB4PSI5IiB5PSI3NiIgdGV4dExlbmd0aD0iMTYiPgpIVwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjkiIHk9IjkyIiB0ZXh0TGVuZ3RoPSI4MCI+CsKzL+KCh868cy90aWNrCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMTQwIiB0ZXh0TGVuZ3RoPSIxNiI+Ck9TCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI2NCI+CjHOvHMvdGljawo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMzIiB5PSI3NiIgdGV4dExlbmd0aD0iNDAiPgp0aWNrcwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMzIiB5PSIxNDAiIHRleHRMZW5ndGg9IjQwIj4KdGlja3MKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxMDUiIHk9IjkyIiB0ZXh0TGVuZ3RoPSI4Ij4KMAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjEwNSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI4Ij4KMAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjE2OSIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSIxMTIiPgpyZWZfdGlja19jb3VudAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjE4NSIgeT0iMjgiIHRleHRMZW5ndGg9IjQwIj4KY2FsbHMKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyMDEiIHk9IjEyIiB0ZXh0TGVuZ3RoPSI0MCI+CnRpbWVyCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iMjMzIiB5PSIyOCIgdGV4dExlbmd0aD0iMTEyIj4KbWFya19yZWZlcmVuY2UKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNDkiIHk9IjEyIiB0ZXh0TGVuZ3RoPSI4MCI+CmludGVycnVwdCwKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNzMiIHk9IjkyIiB0ZXh0TGVuZ3RoPSI4Ij4KNwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ0MSIgeT0iOTIiIHRleHRMZW5ndGg9IjE2Ij4KMTQKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSI0NDEiIHk9IjE1NiIgdGV4dExlbmd0aD0iOCI+CjYKPC90ZXh0Pgo8L2c+Cjwvc3ZnPg==" alt="" /></p>
+</center>
+<p><code>cfg</code> must be the instance of <a href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="TicklessCfg"><code>TicklessCfg</code></a> that was passed to
+<a href="../../r3_portkit/tickless/type.TicklessState.html" title="TicklessState"><code>TicklessState</code></a> to derive <code>Self</code>.</p>
+</div><h3 id="tymethod.tick_count" class="method"><code>fn <a href="#tymethod.tick_count" class="fnname">tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#588" title="goto source code">[src]</a></h3><div class="docblock"><p>Get the OS tick count
+(in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_tick_count"><code>max_tick_count</code></a><code>()</code>).</p>
+<p><code>cfg</code> must be the instance of <a href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="TicklessCfg"><code>TicklessCfg</code></a> that was passed to
+<a href="../../r3_portkit/tickless/type.TicklessState.html" title="TicklessState"><code>TicklessState</code></a> to derive <code>Self</code>.</p>
+<p><code>hw_tick_count</code> should be in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.hw_max_tick_count"><code>hw_max_tick_count</code></a><code>()</code>.
+In addition, <code>hw_tick_count</code> must satisfy the following condition:</p>
+<ul>
+<li>Let <code>ref_hw_tick_count</code> and <code>ref_tick_count</code> be the last reference
+point (the last values passed to and returned by <a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.mark_reference"><code>mark_reference</code></a>,
+respectively).</li>
+<li>Let <code>period = cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_tick_count"><code>max_tick_count</code></a><code>() + 1</code>.</li>
+<li>Let <code>hw_period = cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.hw_max_tick_count"><code>hw_max_tick_count</code></a><code>() + 1</code>.</li>
+<li>Let <code>hw_max_timeout = (tick_count_to_hw_tick_count((ref_tick_count + cfg.max_timeout) % period) + hw_period - ref_hw_tick_count) % hw_period</code>.</li>
+<li>There must exist <code>hw_timeout</code> and <code>latency</code> such that
+<code>hw_timeout ∈ 0..=hw_max_timeout</code>, <code>latency ∈ 0..=hw_headroom_ticks</code>,
+and <code>hw_tick_count == (ref_hw_tick_count + hw_timeout + latency) % hw_period</code>.</li>
+</ul>
+<p><strong>Note:</strong> <code>ref_hw_tick_count</code> should not be confused with the
+identically-named private field of <a href="../../r3_portkit/tickless/struct.TicklessStateCore.html" title="TicklessStateCore"><code>TicklessStateCore</code></a>.</p>
+<center>
+<p><img src="data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iYm9iIiBmb250LWZhbWlseT0iJ1NvdXJjZSBDb2RlIFBybycsJ0FuZGFsZSBNb25vJywnU2Vnb2UgVUkgTW9ubycsJ0RlamF2dSBTYW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxNCIgaGVpZ2h0PSIyNzIiIHdpZHRoPSI2NTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bWFya2VyIGlkPSJ0cmlhbmdsZSIgbWFya2VySGVpZ2h0PSI4IiBtYXJrZXJXaWR0aD0iOCIgb3JpZW50PSJhdXRvIiByZWZYPSI0IiByZWZZPSIyIiB2aWV3Qm94PSIwIDAgOCA0Ij4KPHBvbHlnb24gY2xhc3M9ImZnX2ZpbGwiIHBvaW50cz0iMCwwIDAsNCA4LDIgMCwwIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjbGVhcl90cmlhbmdsZSIgbWFya2VySGVpZ2h0PSIxMCIgbWFya2VyV2lkdGg9IjEwIiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEiIHJlZlk9IjciIHZpZXdCb3g9IjAgMCAyMCAxNCI+Cjxwb2x5Z29uIGNsYXNzPSJiZ19maWxsIiBwb2ludHM9IjIsMiAyLDEyIDE4LDcgMiwyIi8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJjaXJjbGUiIG1hcmtlckhlaWdodD0iNSIgbWFya2VyV2lkdGg9IjUiIG9yaWVudD0iYXV0byIgcmVmWD0iMTAiIHJlZlk9IjEwIiB2aWV3Qm94PSIwIDAgMjAgMjAiPgo8Y2lyY2xlIGNsYXNzPSJmZ19maWxsIiBjeD0iMTAiIGN5PSIxMCIgcj0iOCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ic3F1YXJlIiBtYXJrZXJIZWlnaHQ9IjUiIG1hcmtlcldpZHRoPSI1IiBvcmllbnQ9ImF1dG8iIHJlZlg9IjEwIiByZWZZPSIxMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KPHJlY3QgY2xhc3M9ImZnX2ZpbGwiIGhlaWdodD0iMjAiIHdpZHRoPSIyMCIgeD0iMCIgeT0iMCIvPgo8L21hcmtlcj4KPG1hcmtlciBpZD0ib3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMTAiIG1hcmtlcldpZHRoPSIxMCIgb3JpZW50PSJhdXRvIiByZWZYPSIxMCIgcmVmWT0iMTAiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIxMCIgY3k9IjEwIiByPSI0Ii8+CjwvbWFya2VyPgo8bWFya2VyIGlkPSJiaWdfb3Blbl9jaXJjbGUiIG1hcmtlckhlaWdodD0iMjAiIG1hcmtlcldpZHRoPSIyMCIgb3JpZW50PSJhdXRvIiByZWZYPSIyMCIgcmVmWT0iMjAiIHZpZXdCb3g9IjAgMCA0MCA0MCI+CjxjaXJjbGUgY2xhc3M9ImJnX2ZpbGwiIGN4PSIyMCIgY3k9IjIwIiByPSI2Ii8+CjwvbWFya2VyPgo8L2RlZnM+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgpyZWN0LmJhY2tkcm9wIHsKICAgIGZpbGw6IHdoaXRlOwp9CnRleHR7CiAgICBmaWxsOiBibGFjazsKfQoKY2lyY2xlIHsKICAgIGZpbGw6IG5vbmU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9CgpsaW5lIHsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCnBhdGggewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogYmxhY2s7CiAgICBzdHJva2Utd2lkdGg6IDE7CiAgICBzdHJva2Utb3BhY2l0eTogMTsKICAgIGZpbGwtb3BhY2l0eTogMTsKICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgIHN0cm9rZS1saW5lam9pbjogbWl0ZXI7Cn0KCmxpbmUuZGFzaGVkIHsKICAgIHN0cm9rZS1kYXNoYXJyYXk6IDU7Cn0KCi5mZ19maWxsIHsKICAgIGZpbGw6IGJsYWNrOwp9CgoKLmJnX2ZpbGwgewogICAgZmlsbDogd2hpdGU7CiAgICBzdHJva2U6IGJsYWNrOwogICAgc3Ryb2tlLXdpZHRoOiAxOwp9Cgp0c3Bhbi5oZWFkewogICAgZmlsbDogbm9uZTsKICAgIHN0cm9rZTogbm9uZTsKfQogICAgCjwvc3R5bGU+CjxyZWN0IGNsYXNzPSJiYWNrZHJvcCIgaGVpZ2h0PSIyNzIiIHdpZHRoPSI2NTYiIHg9IjAiIHk9IjAiLz4KPGc+CjxsaW5lIHgxPSIxMDQiIHgyPSIxNDAiIHkxPSI3MiIgeTI9IjcyIi8+CjxsaW5lIHgxPSIxNDAiIHgyPSIxNDAiIHkxPSI0OCIgeTI9IjcyIi8+CjxsaW5lIHgxPSIxNDAiIHgyPSIyMDAiIHkxPSI3MiIgeTI9IjcyIi8+CjxwYXRoIGQ9Ik0gMjA0IDc2IEEgNCA0IDAgMCAwIDIwMCA3MiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMTA4IiB4Mj0iMTA4IiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSIxMDgiIHgyPSIxMzIiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjEzMiIgeDI9IjEzMiIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iMTMyIiB4Mj0iMTU2IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSIxNTYiIHgyPSIxNTYiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjE1NiIgeDI9IjE4MCIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iMTgwIiB4Mj0iMTgwIiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSIxODAiIHgyPSIyMDQiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjIwNCIgeDI9IjIwNCIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iMjA0IiB4Mj0iMjI4IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSIyMjgiIHgyPSIyMjgiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjIyOCIgeDI9IjI1MiIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iMjUyIiB4Mj0iMjUyIiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNzYiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjI3NiIgeDI9IjI3NiIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iMjc2IiB4Mj0iMzAwIiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSIzMDAiIHgyPSIzMDAiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjMwMCIgeDI9IjMyNCIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iMzI0IiB4Mj0iMzI0IiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSIzMjQiIHgyPSIzNDgiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjM0OCIgeDI9IjM0OCIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iMzQ4IiB4Mj0iMzcyIiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSIzNzIiIHgyPSIzNzIiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjM3MiIgeDI9IjM5NiIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iMzk2IiB4Mj0iMzk2IiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSIzOTYiIHgyPSI0MjAiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjQyMCIgeDI9IjQyMCIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iNDIwIiB4Mj0iNDQ0IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSI0NDQiIHgyPSI0NDQiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjQ0NCIgeDI9IjQ2OCIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iNDY4IiB4Mj0iNDY4IiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSI0NjgiIHgyPSI0OTIiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjQ5MiIgeDI9IjQ5MiIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iNDkyIiB4Mj0iNTE2IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSI1MTYiIHgyPSI1MTYiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjUxNiIgeDI9IjU0MCIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iNTQwIiB4Mj0iNTQwIiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjxsaW5lIHgxPSI1NDAiIHgyPSI1NjQiIHkxPSIxMjAiIHkyPSIxMjAiLz4KPGxpbmUgeDE9IjU2NCIgeDI9IjU2NCIgeTE9IjEyMCIgeTI9IjEyOCIvPgo8bGluZSB4MT0iNTY0IiB4Mj0iNTg4IiB5MT0iMTIwIiB5Mj0iMTIwIi8+CjxsaW5lIHgxPSI1ODgiIHgyPSI1ODgiIHkxPSIxMjAiIHkyPSIxMjgiLz4KPGxpbmUgeDE9IjU4OCIgeDI9IjYxMiIgeTE9IjEyMCIgeTI9IjEyMCIvPgo8bGluZSB4MT0iNjEyIiB4Mj0iNjEyIiB5MT0iMTIwIiB5Mj0iMTI4Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIxMDgiIHgyPSIxMDgiIHkxPSIxODQiIHkyPSIxOTIiLz4KPGxpbmUgeDE9IjEwOCIgeDI9IjE2NCIgeTE9IjE4NCIgeTI9IjE4NCIvPgo8bGluZSB4MT0iMTY0IiB4Mj0iMTY0IiB5MT0iMTg0IiB5Mj0iMTkyIi8+CjxsaW5lIHgxPSIxNjQiIHgyPSIyMjAiIHkxPSIxODQiIHkyPSIxODQiLz4KPGxpbmUgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjE4NCIgeTI9IjE5MiIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjc2IiB5MT0iMTg0IiB5Mj0iMTg0Ii8+CjxsaW5lIHgxPSIyNzYiIHgyPSIyNzYiIHkxPSIxODQiIHkyPSIxOTIiLz4KPGxpbmUgeDE9IjI3NiIgeDI9IjMzMiIgeTE9IjE4NCIgeTI9IjE4NCIvPgo8bGluZSB4MT0iMzMyIiB4Mj0iMzMyIiB5MT0iMTg0IiB5Mj0iMTkyIi8+CjxsaW5lIHgxPSIzMzIiIHgyPSIzODgiIHkxPSIxODQiIHkyPSIxODQiLz4KPGxpbmUgeDE9IjM4OCIgeDI9IjM4OCIgeTE9IjE4NCIgeTI9IjE5MiIvPgo8bGluZSB4MT0iMzg4IiB4Mj0iNDQ0IiB5MT0iMTg0IiB5Mj0iMTg0Ii8+CjxsaW5lIHgxPSI0NDQiIHgyPSI0NDQiIHkxPSIxODQiIHkyPSIxOTIiLz4KPGxpbmUgeDE9IjQ0NCIgeDI9IjUwMCIgeTE9IjE4NCIgeTI9IjE4NCIvPgo8bGluZSB4MT0iNTAwIiB4Mj0iNTAwIiB5MT0iMTg0IiB5Mj0iMTkyIi8+CjxsaW5lIHgxPSI1MDAiIHgyPSI1NTYiIHkxPSIxODQiIHkyPSIxODQiLz4KPGxpbmUgeDE9IjU1NiIgeDI9IjU1NiIgeTE9IjE4NCIgeTI9IjE5MiIvPgo8bGluZSB4MT0iNTU2IiB4Mj0iNjEyIiB5MT0iMTg0IiB5Mj0iMTg0Ii8+CjxsaW5lIHgxPSI2MTIiIHgyPSI2MTIiIHkxPSIxODQiIHkyPSIxOTIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIwNCIgeDI9IjIwNCIgeTE9Ijc2IiB5Mj0iODQiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjE1MiIgeTI9IjE2NCIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjUyIiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjxsaW5lIHgxPSIyNTIiIHgyPSIyNTIiIHkxPSIxNDAiIHkyPSIxNTIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjIwNCIgeTI9IjIxMiIvPgo8cGF0aCBkPSJNIDIyMCAyMTIgQSA0IDQgMCAwIDAgMjI0IDIxNiIvPgo8L2c+CjxnPgo8bGluZSBtYXJrZXItZW5kPSJ1cmwoI3RyaWFuZ2xlKSIgeDE9IjIyMCIgeDI9IjIyMCIgeTE9IjI0MCIgeTI9IjIyOCIvPgo8bGluZSB4MT0iMjIwIiB4Mj0iMjIwIiB5MT0iMjQwIiB5Mj0iMjU2Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSIyMjQiIHgyPSI1MDgiIHkxPSIyMTYiIHkyPSIyMTYiLz4KPGxpbmUgeDE9IjUwOCIgeDI9IjUwOCIgeTE9IjIxNiIgeTI9IjI0MCIvPgo8bGluZSB4MT0iNTA4IiB4Mj0iNTUyIiB5MT0iMjE2IiB5Mj0iMjE2Ii8+CjxwYXRoIGQ9Ik0gNTUyIDIxNiBBIDQgNCAwIDAgMCA1NTYgMjEyIi8+CjwvZz4KPGc+CjxsaW5lIG1hcmtlci1lbmQ9InVybCgjdHJpYW5nbGUpIiB4MT0iMjUyIiB4Mj0iMjUyIiB5MT0iMTYiIHkyPSI2MCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iMjUyIiB4Mj0iMjUyIiB5MT0iNzYiIHkyPSI4NCIvPgo8cGF0aCBkPSJNIDI1NiA3MiBBIDQgNCAwIDAgMCAyNTIgNzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjI1NiIgeDI9IjQyMCIgeTE9IjcyIiB5Mj0iNzIiLz4KPGxpbmUgeDE9IjQyMCIgeDI9IjQyMCIgeTE9IjQ4IiB5Mj0iNzIiLz4KPGxpbmUgeDE9IjQyMCIgeDI9IjU2MCIgeTE9IjcyIiB5Mj0iNzIiLz4KPHBhdGggZD0iTSA1NjQgNzYgQSA0IDQgMCAwIDAgNTYwIDcyIi8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0MDAiIHgyPSI0MDgiIHkxPSI0OCIgeTI9IjQ4Ii8+CjwvZz4KPGc+CjxsaW5lIHgxPSI0ODgiIHgyPSI0OTYiIHkxPSIyNTYiIHkyPSIyNTYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjU1NiIgeDI9IjU1NiIgeTE9IjE1MiIgeTI9IjE2NCIvPgo8bGluZSB4MT0iNTU2IiB4Mj0iNTY0IiB5MT0iMTUyIiB5Mj0iMTUyIi8+CjxsaW5lIHgxPSI1NjQiIHgyPSI1NjQiIHkxPSIxNDAiIHkyPSIxNTIiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjU1NiIgeDI9IjU1NiIgeTE9IjIwNCIgeTI9IjIxMiIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNTY0IiB4Mj0iNTY0IiB5MT0iNzYiIHkyPSI4NCIvPgo8L2c+CjxnPgo8bGluZSB4MT0iNTgwIiB4Mj0iNTgwIiB5MT0iNzYiIHkyPSI4NCIvPgo8cGF0aCBkPSJNIDU4NCA3MiBBIDQgNCAwIDAgMCA1ODAgNzYiLz4KPC9nPgo8Zz4KPGxpbmUgeDE9IjU4NCIgeDI9IjYxNiIgeTE9IjcyIiB5Mj0iNzIiLz4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMTI0IiB0ZXh0TGVuZ3RoPSIxNiI+CkhXCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMTQwIiB0ZXh0TGVuZ3RoPSI4MCI+CsKzL+KCh868cy90aWNrCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSIxNiI+Ck9TCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iOSIgeT0iMjA0IiB0ZXh0TGVuZ3RoPSI2NCI+CjHOvHMvdGljawo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjMzIiB5PSIxMjQiIHRleHRMZW5ndGg9IjQwIj4KdGlja3MKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIzMyIgeT0iMTg4IiB0ZXh0TGVuZ3RoPSI0MCI+CnRpY2tzCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNzMiIHk9IjQ0IiB0ZXh0TGVuZ3RoPSIxMzYiPgpod19oZWFkcm9vbV90aWNrcwo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjEwNSIgeT0iMTA4IiB0ZXh0TGVuZ3RoPSIxMDQiPgrilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpEKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxMDUiIHk9IjE0MCIgdGV4dExlbmd0aD0iOCI+CjAKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxMDUiIHk9IjIwNCIgdGV4dExlbmd0aD0iOCI+CjAKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxNDUiIHk9IjI2OCIgdGV4dExlbmd0aD0iMTEyIj4KcmVmX3RpY2tfY291bnQKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIxNzciIHk9IjEyIiB0ZXh0TGVuZ3RoPSIxMzYiPgpyZWZfaHdfdGlja19jb3VudAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjI0OSIgeT0iMTA4IiB0ZXh0TGVuZ3RoPSIzNjgiPgrilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpHilpEKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNzMiIHk9IjE0MCIgdGV4dExlbmd0aD0iOCI+CjcKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIyNzMiIHk9IjIwNCIgdGV4dExlbmd0aD0iOCI+CjMKPC90ZXh0Pgo8L2c+CjxnPgo8dGV4dCB4PSIzNTMiIHk9IjQ0IiB0ZXh0TGVuZ3RoPSI0OCI+Cmh3X21heAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQwOSIgeT0iNDQiIHRleHRMZW5ndGg9IjU2Ij4KdGltZW91dAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjQ0MSIgeT0iMTQwIiB0ZXh0TGVuZ3RoPSIxNiI+CjE0CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNDQxIiB5PSIyMDQiIHRleHRMZW5ndGg9IjgiPgo2CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNDY1IiB5PSIyNTIiIHRleHRMZW5ndGg9IjI0Ij4KbWF4CjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNDk3IiB5PSIyNTIiIHRleHRMZW5ndGg9IjU2Ij4KdGltZW91dAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjU4NSIgeT0iMTU2IiB0ZXh0TGVuZ3RoPSI3MiI+Cmh3X3BlcmlvZAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjU5MyIgeT0iMjIwIiB0ZXh0TGVuZ3RoPSI0OCI+CnBlcmlvZAo8L3RleHQ+CjwvZz4KPGc+Cjx0ZXh0IHg9IjYwOSIgeT0iMTQwIiB0ZXh0TGVuZ3RoPSIxNiI+CjIxCjwvdGV4dD4KPC9nPgo8Zz4KPHRleHQgeD0iNjA5IiB5PSIyMDQiIHRleHRMZW5ndGg9IjE2Ij4KMTIKPC90ZXh0Pgo8L2c+Cjwvc3ZnPg==" alt="" /></p>
+</center>
+<p>In the above diagram, <code>hw_tick_count</code> should fall within the filled
+zone.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="provided-methods" class="small-section-header">Provided methods<a href="#provided-methods" class="anchor"></a></h2><div class="methods"><h3 id="method.mark_reference_and_measure" class="method"><code>fn <a href="#method.mark_reference_and_measure" class="fnname">mark_reference_and_measure</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;hw_tick_count: u32, <br>&nbsp;&nbsp;&nbsp;&nbsp;ticks: u32<br>) -&gt; <a class="struct" href="../../r3_portkit/tickless/struct.Measurement.html" title="struct r3_portkit::tickless::Measurement">Measurement</a></code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#442-483" title="goto source code">[src]</a></h3><div class="docblock"><p><a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.mark_reference">Mark a reference point</a> and start measuring the specified time interval
+<code>ticks</code> (measured in OS ticks = microseconds).</p>
+<p>The caller can use the information contained in the returned
+<a href="../../r3_portkit/tickless/struct.Measurement.html" title="Measurement"><code>Measurement</code></a> to configure timer hardware and receive an interrupt
+at the end of measurement.</p>
+<p><code>hw_tick_count</code> should be in range <code>0..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.hw_max_tick_count"><code>hw_max_tick_count</code></a><code>()</code>
+and satisfy the requirements of <a href="../../r3_portkit/tickless/trait.TicklessStateTrait.html#tymethod.tick_count" title="TicklessStateTrait::tick_count"><code>TicklessStateTrait::tick_count</code></a>.</p>
+<p><code>ticks</code> should be in range <code>1..=cfg.</code><a href="../../r3_portkit/tickless/struct.TicklessCfg.html#method.max_timeout"><code>max_timeout</code></a><code>()</code>.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"><h3 id="impl-TicklessStateTrait" class="impl"><code class="in-band">impl <a class="trait" href="../../r3_portkit/tickless/trait.TicklessStateTrait.html" title="trait r3_portkit::tickless::TicklessStateTrait">TicklessStateTrait</a> for <a class="struct" href="../../r3_portkit/tickless/struct.TicklessStatelessCore.html" title="struct r3_portkit::tickless::TicklessStatelessCore">TicklessStatelessCore</a></code><a href="#impl-TicklessStateTrait" class="anchor"></a><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#617-663" title="goto source code">[src]</a></h3><div class="impl-items"><h4 id="method.reset" class="method hidden"><code>fn <a href="#method.reset" class="fnname">reset</a>(&amp;mut self, _cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, _hw_tick_count: u32)</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#618-622" title="goto source code">[src]</a></h4><h4 id="method.mark_reference" class="method hidden"><code>fn <a href="#method.mark_reference" class="fnname">mark_reference</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#625-627" title="goto source code">[src]</a></h4><h4 id="method.tick_count_to_hw_tick_count" class="method hidden"><code>fn <a href="#method.tick_count_to_hw_tick_count" class="fnname">tick_count_to_hw_tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#630-647" title="goto source code">[src]</a></h4><h4 id="method.tick_count" class="method hidden"><code>fn <a href="#method.tick_count" class="fnname">tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#650-662" title="goto source code">[src]</a></h4></div><h3 id="impl-TicklessStateTrait-1" class="impl"><code class="in-band">impl&lt;Subticks:&nbsp;<a class="trait" href="../../r3_portkit/num/wrapping/trait.WrappingTrait.html" title="trait r3_portkit::num::wrapping::WrappingTrait">WrappingTrait</a>&gt; <a class="trait" href="../../r3_portkit/tickless/trait.TicklessStateTrait.html" title="trait r3_portkit::tickless::TicklessStateTrait">TicklessStateTrait</a> for <a class="struct" href="../../r3_portkit/tickless/struct.TicklessStateCore.html" title="struct r3_portkit::tickless::TicklessStateCore">TicklessStateCore</a>&lt;Subticks&gt;</code><a href="#impl-TicklessStateTrait-1" class="anchor"></a><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#665-735" title="goto source code">[src]</a></h3><div class="impl-items"><h4 id="method.reset-1" class="method hidden"><code>fn <a href="#method.reset-1" class="fnname">reset</a>(&amp;mut self, _cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32)</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#667-670" title="goto source code">[src]</a></h4><h4 id="method.mark_reference-1" class="method hidden"><code>fn <a href="#method.mark_reference-1" class="fnname">mark_reference</a>(&amp;mut self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#673-690" title="goto source code">[src]</a></h4><h4 id="method.tick_count_to_hw_tick_count-1" class="method hidden"><code>fn <a href="#method.tick_count_to_hw_tick_count-1" class="fnname">tick_count_to_hw_tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#693-716" title="goto source code">[src]</a></h4><h4 id="method.tick_count-1" class="method hidden"><code>fn <a href="#method.tick_count-1" class="fnname">tick_count</a>(&amp;self, cfg: &amp;<a class="struct" href="../../r3_portkit/tickless/struct.TicklessCfg.html" title="struct r3_portkit::tickless::TicklessCfg">TicklessCfg</a>, hw_tick_count: u32) -&gt; u32</code><a class="srclink" href="../../src/r3_portkit/tickless.rs.html#719-734" title="goto source code">[src]</a></h4></div></div><span class="loading-content">Loading content...</span><script type="text/javascript" src="../../implementors/r3_portkit/tickless/trait.TicklessStateTrait.js" async></script></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="r3_portkit" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script></body></html>

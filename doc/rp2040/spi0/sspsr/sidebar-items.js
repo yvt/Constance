@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["BSY_R","Reader of field `BSY`"],["R","Reader of register SSPSR"],["RFF_R","Reader of field `RFF`"],["RNE_R","Reader of field `RNE`"],["TFE_R","Reader of field `TFE`"],["TNF_R","Reader of field `TNF`"]]});

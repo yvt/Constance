@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IC_SDA_RX_HOLD_W","Write proxy for field `IC_SDA_RX_HOLD`"],["IC_SDA_TX_HOLD_W","Write proxy for field `IC_SDA_TX_HOLD`"]],"type":[["IC_SDA_RX_HOLD_R","Reader of field `IC_SDA_RX_HOLD`"],["IC_SDA_TX_HOLD_R","Reader of field `IC_SDA_TX_HOLD`"],["R","Reader of register IC_SDA_HOLD"],["W","Writer for register IC_SDA_HOLD"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["FIFO_R","Reader of field `FIFO`"],["R","Reader of register INTS"]]});

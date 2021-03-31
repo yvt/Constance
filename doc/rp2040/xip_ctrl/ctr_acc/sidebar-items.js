@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register CTR_ACC"],["W","Writer for register CTR_ACC"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BYPASS_W","Write proxy for field `BYPASS`"],["REFDIV_W","Write proxy for field `REFDIV`"]],"type":[["BYPASS_R","Reader of field `BYPASS`"],["LOCK_R","Reader of field `LOCK`"],["R","Reader of register CS"],["REFDIV_R","Reader of field `REFDIV`"],["W","Writer for register CS"]]});

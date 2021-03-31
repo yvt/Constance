@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Implemented by a port. This trait contains items related to low-level operations for controlling CPU states and context switching."><meta name="keywords" content="rust, rustlang, rust-lang, PortThreading"><title>r3::kernel::PortThreading - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc trait"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../r3/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Trait PortThreading</p><div class="sidebar-elems"><div class="block items"><a class="sidebar-title" href="#associated-types">Associated Types</a><div class="sidebar-links"><a href="#associatedtype.PortTaskState">PortTaskState</a></div><a class="sidebar-title" href="#associated-const">Associated Constants</a><div class="sidebar-links"><a href="#associatedconstant.PORT_TASK_STATE_INIT">PORT_TASK_STATE_INIT</a><a href="#associatedconstant.STACK_DEFAULT_SIZE">STACK_DEFAULT_SIZE</a><a href="#associatedconstant.STACK_ALIGN">STACK_ALIGN</a></div><a class="sidebar-title" href="#required-methods">Required Methods</a><div class="sidebar-links"><a href="#tymethod.is_cpu_lock_active">is_cpu_lock_active</a><a href="#tymethod.leave_cpu_lock">leave_cpu_lock</a><a href="#tymethod.dispatch_first_task">dispatch_first_task</a><a href="#tymethod.yield_cpu">yield_cpu</a><a href="#tymethod.exit_and_dispatch">exit_and_dispatch</a><a href="#tymethod.enter_cpu_lock">enter_cpu_lock</a><a href="#tymethod.initialize_task_state">initialize_task_state</a><a href="#tymethod.is_task_context">is_task_context</a></div><a class="sidebar-title" href="#provided-methods">Provided Methods</a><div class="sidebar-links"><a href="#method.try_enter_cpu_lock">try_enter_cpu_lock</a></div><a class="sidebar-title" href="#implementors">Implementors</a></div><p class="location"><a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a></p><div id="sidebar-vars" data-name="PortThreading" data-ty="trait" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Trait <a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a>::<wbr><a class="trait" href="">PortThreading</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/r3/kernel.rs.html#452-564" title="goto source code">[src]</a></span></h1><div class="docblock type-decl hidden-by-usual-hider"><pre class="rust trait">pub unsafe trait PortThreading: <a class="trait" href="../../r3/kernel/trait.KernelCfg1.html" title="trait r3::kernel::KernelCfg1">KernelCfg1</a> {
+    type <a href="#associatedtype.PortTaskState" class="type">PortTaskState</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> + <a class="trait" href="../../r3/utils/trait.Init.html" title="trait r3::utils::Init">Init</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> + 'static;
+
+    const <a href="#associatedconstant.PORT_TASK_STATE_INIT" class="constant"><b>PORT_TASK_STATE_INIT</b></a>: Self::<a class="type" href="../../r3/kernel/trait.PortThreading.html#associatedtype.PortTaskState" title="type r3::kernel::PortThreading::PortTaskState">PortTaskState</a>;
+    const <a href="#associatedconstant.STACK_DEFAULT_SIZE" class="constant"><b>STACK_DEFAULT_SIZE</b></a>: usize;
+    const <a href="#associatedconstant.STACK_ALIGN" class="constant"><b>STACK_ALIGN</b></a>: usize;
+
+    unsafe fn <a href="#tymethod.dispatch_first_task" class="fnname">dispatch_first_task</a>() -&gt; !;
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.yield_cpu" class="fnname">yield_cpu</a>();
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.exit_and_dispatch" class="fnname">exit_and_dispatch</a>(task: &amp;'static <a class="struct" href="../../r3/kernel/struct.TaskCb.html" title="struct r3::kernel::TaskCb">TaskCb</a>&lt;Self&gt;) -&gt; !;
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.enter_cpu_lock" class="fnname">enter_cpu_lock</a>();
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.leave_cpu_lock" class="fnname">leave_cpu_lock</a>();
+<div class="item-spacer"></div>    unsafe fn <a href="#tymethod.initialize_task_state" class="fnname">initialize_task_state</a>(task: &amp;'static <a class="struct" href="../../r3/kernel/struct.TaskCb.html" title="struct r3::kernel::TaskCb">TaskCb</a>&lt;Self&gt;);
+<div class="item-spacer"></div>    fn <a href="#tymethod.is_cpu_lock_active" class="fnname">is_cpu_lock_active</a>() -&gt; bool;
+<div class="item-spacer"></div>    fn <a href="#tymethod.is_task_context" class="fnname">is_task_context</a>() -&gt; bool;
+
+    unsafe fn <a href="#method.try_enter_cpu_lock" class="fnname">try_enter_cpu_lock</a>() -&gt; bool { ... }
+}</pre></div><div class="docblock"><p>Implemented by a port. This trait contains items related to low-level
+operations for controlling CPU states and context switching.</p>
+<h1 id="safety" class="section-header"><a href="#safety">Safety</a></h1>
+<p>Implementing a port is inherently unsafe because it’s responsible for
+initializing the execution environment and providing a dispatcher
+implementation.</p>
+<p>These methods are only meant to be called by the kernel.</p>
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script></div><h2 id="associated-types" class="small-section-header">Associated Types<a href="#associated-types" class="anchor"></a></h2><div class="methods"><h3 id="associatedtype.PortTaskState" class="method"><code>type <a href="#associatedtype.PortTaskState" class="type">PortTaskState</a>: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> + <a class="trait" href="../../r3/utils/trait.Init.html" title="trait r3::utils::Init">Init</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> + 'static</code><a class="srclink" href="../../src/r3/kernel.rs.html#453" title="goto source code">[src]</a></h3></div><span class="loading-content">Loading content...</span><h2 id="associated-const" class="small-section-header">Associated Constants<a href="#associated-const" class="anchor"></a></h2><div class="methods"><h3 id="associatedconstant.PORT_TASK_STATE_INIT" class="method"><code>const <a href="#associatedconstant.PORT_TASK_STATE_INIT" class="constant"><b>PORT_TASK_STATE_INIT</b></a>: Self::<a class="type" href="../../r3/kernel/trait.PortThreading.html#associatedtype.PortTaskState" title="type r3::kernel::PortThreading::PortTaskState">PortTaskState</a></code><a class="srclink" href="../../src/r3/kernel.rs.html#457" title="goto source code">[src]</a></h3><div class="docblock"><p>The initial value of <a href="../../r3/kernel/struct.TaskCb.html#structfield.port_task_state" title="TaskCb::port_task_state"><code>TaskCb::port_task_state</code></a> for all tasks.</p>
+</div><h3 id="associatedconstant.STACK_DEFAULT_SIZE" class="method"><code>const <a href="#associatedconstant.STACK_DEFAULT_SIZE" class="constant"><b>STACK_DEFAULT_SIZE</b></a>: usize</code><a class="srclink" href="../../src/r3/kernel.rs.html#460" title="goto source code">[src]</a></h3><div class="docblock"><p>The default stack size for tasks.</p>
+</div><h3 id="associatedconstant.STACK_ALIGN" class="method"><code>const <a href="#associatedconstant.STACK_ALIGN" class="constant"><b>STACK_ALIGN</b></a>: usize</code><a class="srclink" href="../../src/r3/kernel.rs.html#472" title="goto source code">[src]</a></h3><div class="docblock"><p>The alignment requirement for task stack regions.</p>
+<p>Both ends of stack regions are aligned by <code>STACK_ALIGN</code>. It’s
+automatically enforced by the kernel configurator for automatically
+allocated stack regions (this applies to tasks created without
+<a href="../../r3/kernel/cfg/struct.CfgTaskBuilder.html#method.stack_hunk"><code>stack_hunk</code></a>). The kernel configurator does not check the alignemnt
+for manually-allocated stack regions.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="required-methods" class="small-section-header">Required methods<a href="#required-methods" class="anchor"></a></h2><div class="methods"><h3 id="tymethod.dispatch_first_task" class="method"><code>unsafe fn <a href="#tymethod.dispatch_first_task" class="fnname">dispatch_first_task</a>() -&gt; !</code><a class="srclink" href="../../src/r3/kernel.rs.html#482" title="goto source code">[src]</a></h3><div class="docblock"><p>Transfer the control to the dispatcher, discarding the current
+(startup) context. <code>*state.</code><a href="../../r3/kernel/struct.State.html#method.running_task_ptr"><code>running_task_ptr</code></a><code>()</code> is <code>None</code> at this
+point. The dispatcher should call <a href="../../r3/kernel/trait.PortToKernel.html#tymethod.choose_running_task" title="PortToKernel::choose_running_task"><code>PortToKernel::choose_running_task</code></a>
+to find the next task to run and transfer the control to that task.</p>
+<p>Precondition: CPU Lock active, a boot context</p>
+</div><h3 id="tymethod.yield_cpu" class="method"><code>unsafe fn <a href="#tymethod.yield_cpu" class="fnname">yield_cpu</a>()</code><a class="srclink" href="../../src/r3/kernel.rs.html#504" title="goto source code">[src]</a></h3><div class="docblock"><p>Yield the processor.</p>
+<p>In a task context, this method immediately transfers the control to
+a dispatcher. The dispatcher should call
+<a href="../../r3/kernel/trait.PortToKernel.html#tymethod.choose_running_task" title="PortToKernel::choose_running_task"><code>PortToKernel::choose_running_task</code></a> to find the next task to run and
+transfer the control to that task.</p>
+<p>In an interrupt context, the effect of this method will be deferred
+until the processor completes the execution of all active interrupt
+handler threads.</p>
+<p>Precondition: CPU Lock inactive</p>
+<div class="admonition-follows"></div>
+<blockquote>
+<p><strong>Port Implementation Note:</strong> One way to handle the interrupt context
+case is to set a flag variable and check it in the epilogue of a
+first-level interrupt handler. Another way is to raise a low-priority
+interrupt (such as PendSV in Arm-M) and implement dispatching in the
+handler.</p>
+</blockquote>
+</div><h3 id="tymethod.exit_and_dispatch" class="method"><code>unsafe fn <a href="#tymethod.exit_and_dispatch" class="fnname">exit_and_dispatch</a>(task: &amp;'static <a class="struct" href="../../r3/kernel/struct.TaskCb.html" title="struct r3::kernel::TaskCb">TaskCb</a>&lt;Self&gt;) -&gt; !</code><a class="srclink" href="../../src/r3/kernel.rs.html#513" title="goto source code">[src]</a></h3><div class="docblock"><p>Destroy the state of the previously running task (<code>task</code>, which has
+already been removed from <code>*state.</code><a href="../../r3/kernel/struct.State.html#method.running_task_ptr"><code>running_task_ptr</code></a><code>()</code>) and proceed
+to the dispatcher.</p>
+<p>Precondition: CPU Lock active</p>
+</div><h3 id="tymethod.enter_cpu_lock" class="method"><code>unsafe fn <a href="#tymethod.enter_cpu_lock" class="fnname">enter_cpu_lock</a>()</code><a class="srclink" href="../../src/r3/kernel.rs.html#518" title="goto source code">[src]</a></h3><div class="docblock"><p>Disable all kernel-managed interrupts (this state is called <em>CPU Lock</em>).</p>
+<p>Precondition: CPU Lock inactive</p>
+</div><h3 id="tymethod.leave_cpu_lock" class="method"><code>unsafe fn <a href="#tymethod.leave_cpu_lock" class="fnname">leave_cpu_lock</a>()</code><a class="srclink" href="../../src/r3/kernel.rs.html#524" title="goto source code">[src]</a></h3><div class="docblock"><p>Re-enable kernel-managed interrupts previously disabled by
+<code>enter_cpu_lock</code>, thus deactivating the CPU Lock state.</p>
+<p>Precondition: CPU Lock active</p>
+</div><h3 id="tymethod.initialize_task_state" class="method"><code>unsafe fn <a href="#tymethod.initialize_task_state" class="fnname">initialize_task_state</a>(task: &amp;'static <a class="struct" href="../../r3/kernel/struct.TaskCb.html" title="struct r3::kernel::TaskCb">TaskCb</a>&lt;Self&gt;)</code><a class="srclink" href="../../src/r3/kernel.rs.html#554" title="goto source code">[src]</a></h3><div class="docblock"><p>Prepare the task for activation. More specifically, set the current
+program counter to <a href="../../r3/kernel/struct.TaskAttr.html#structfield.entry_point" title="TaskAttr::entry_point"><code>TaskAttr::entry_point</code></a> and the current stack
+pointer to either end of <a href="../../r3/kernel/struct.TaskAttr.html#structfield.stack" title="TaskAttr::stack"><code>TaskAttr::stack</code></a>, ensuring the task will
+start execution from <code>entry_point</code> next time the task receives the
+control.</p>
+<p>Do not call this for a running task. Calling this for a dormant task is
+always safe. For tasks in other states, whether this method is safe is
+dependent on how the programming language the task code is written in
+is implemented. In particular, this is unsafe for Rust task code because
+it might violate the requirement of <a href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html"><code>Pin</code></a> if there’s a <code>Pin</code> pointing
+to something on the task’s stack.</p>
+<p>Precondition: CPU Lock active</p>
+</div><h3 id="tymethod.is_cpu_lock_active" class="method"><code>fn <a href="#tymethod.is_cpu_lock_active" class="fnname">is_cpu_lock_active</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#557" title="goto source code">[src]</a></h3><div class="docblock"><p>Return a flag indicating whether a CPU Lock state is active.</p>
+</div><h3 id="tymethod.is_task_context" class="method"><code>fn <a href="#tymethod.is_task_context" class="fnname">is_task_context</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#563" title="goto source code">[src]</a></h3><div class="docblock"><p>Return a flag indicating whether the current context is
+<a href="../../r3/index.html#contexts">an task context</a>.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="provided-methods" class="small-section-header">Provided methods<a href="#provided-methods" class="anchor"></a></h2><div class="methods"><h3 id="method.try_enter_cpu_lock" class="method"><code>unsafe fn <a href="#method.try_enter_cpu_lock" class="fnname">try_enter_cpu_lock</a>() -&gt; bool</code><a class="srclink" href="../../src/r3/kernel.rs.html#528-536" title="goto source code">[src]</a></h3><div class="docblock"><p>Activate CPU Lock. Return <code>true</code> iff CPU Lock was inactive before the
+call.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"></div><span class="loading-content">Loading content...</span><script type="text/javascript" src="../../implementors/r3/kernel/trait.PortThreading.js" async></script></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="r3" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script></body></html>

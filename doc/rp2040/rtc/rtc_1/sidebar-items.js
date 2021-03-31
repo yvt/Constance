@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DAY_R","Reader of field `DAY`"],["MONTH_R","Reader of field `MONTH`"],["R","Reader of register RTC_1"],["YEAR_R","Reader of field `YEAR`"]]});

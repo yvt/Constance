@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ILPDVSR_W","Write proxy for field `ILPDVSR`"]],"type":[["ILPDVSR_R","Reader of field `ILPDVSR`"],["R","Reader of register UARTILPR"],["W","Writer for register UARTILPR"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["N_CHANNELS_R","Reader of field `N_CHANNELS`"],["R","Reader of register N_CHANNELS"]]});

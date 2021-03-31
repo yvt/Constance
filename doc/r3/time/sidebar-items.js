@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Duration","Represents a signed time span used by the API surface of the R3 RTOS."],["Time","Represents a timestamp used by the API surface of the R3 RTOS."],["TryFromDateTimeError","Error type returned when a checked timestamp type conversion fails."],["TryFromDurationError","Error type returned when a checked duration type conversion fails."]]});

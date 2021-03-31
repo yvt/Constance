@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["MSTICR_R","Reader of field `MSTICR`"],["R","Reader of register MSTICR"]]});

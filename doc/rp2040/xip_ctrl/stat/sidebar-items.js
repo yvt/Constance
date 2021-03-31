@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["FIFO_EMPTY_R","Reader of field `FIFO_EMPTY`"],["FIFO_FULL_R","Reader of field `FIFO_FULL`"],["FLUSH_READY_R","Reader of field `FLUSH_READY`"],["R","Reader of register STAT"]]});

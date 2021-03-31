@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["platform","Indicates the type of platform in use"]],"struct":[["RegisterBlock","Register block"]],"type":[["PLATFORM","Indicates the type of platform in use"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SETPEND_W","Write proxy for field `SETPEND`"]],"type":[["R","Reader of register NVIC_ISPR"],["SETPEND_R","Reader of field `SETPEND`"],["W","Writer for register NVIC_ISPR"]]});

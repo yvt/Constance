@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FC0_INTERVAL_W","Write proxy for field `FC0_INTERVAL`"]],"type":[["FC0_INTERVAL_R","Reader of field `FC0_INTERVAL`"],["R","Reader of register FC0_INTERVAL"],["W","Writer for register FC0_INTERVAL"]]});

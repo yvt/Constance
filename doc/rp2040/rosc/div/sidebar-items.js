@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["DIV_A","set to 0xaa0 + div where\\n div = 0 divides by 32\\n div = 1-31 divides by div\\n any other value sets div=0 and therefore divides by 32\\n this register resets to div=16"]],"struct":[["DIV_W","Write proxy for field `DIV`"]],"type":[["DIV_R","Reader of field `DIV`"],["R","Reader of register DIV"],["W","Writer for register DIV"]]});

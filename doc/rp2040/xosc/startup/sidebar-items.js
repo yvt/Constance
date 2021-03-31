@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DELAY_W","Write proxy for field `DELAY`"],["X4_W","Write proxy for field `X4`"]],"type":[["DELAY_R","Reader of field `DELAY`"],["R","Reader of register STARTUP"],["W","Writer for register STARTUP"],["X4_R","Reader of field `X4`"]]});

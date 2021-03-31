@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CH3_CTR_W","Write proxy for field `CH3_CTR`"]],"type":[["CH3_CTR_R","Reader of field `CH3_CTR`"],["R","Reader of register CH3_CTR"],["W","Writer for register CH3_CTR"]]});

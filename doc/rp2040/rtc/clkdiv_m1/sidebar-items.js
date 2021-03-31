@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CLKDIV_M1_W","Write proxy for field `CLKDIV_M1`"]],"type":[["CLKDIV_M1_R","Reader of field `CLKDIV_M1`"],["R","Reader of register CLKDIV_M1"],["W","Writer for register CLKDIV_M1"]]});

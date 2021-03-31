@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DESIGNER1_R","Reader of field `DESIGNER1`"],["R","Reader of register SSPPERIPHID2"],["REVISION_R","Reader of field `REVISION`"]]});

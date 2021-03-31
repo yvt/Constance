@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["ARCHITECTURE_R","Reader of field `ARCHITECTURE`"],["IMPLEMENTER_R","Reader of field `IMPLEMENTER`"],["PARTNO_R","Reader of field `PARTNO`"],["R","Reader of register CPUID"],["REVISION_R","Reader of field `REVISION`"],["VARIANT_R","Reader of field `VARIANT`"]]});

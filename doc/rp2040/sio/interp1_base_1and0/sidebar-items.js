@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register INTERP1_BASE_1AND0"],["W","Writer for register INTERP1_BASE_1AND0"]]});

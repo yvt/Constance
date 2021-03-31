@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CHAN_ABORT_W","Write proxy for field `CHAN_ABORT`"]],"type":[["CHAN_ABORT_R","Reader of field `CHAN_ABORT`"],["R","Reader of register CHAN_ABORT"],["W","Writer for register CHAN_ABORT"]]});

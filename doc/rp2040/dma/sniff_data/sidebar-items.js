@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register SNIFF_DATA"],["W","Writer for register SNIFF_DATA"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FC0_MAX_KHZ_W","Write proxy for field `FC0_MAX_KHZ`"]],"type":[["FC0_MAX_KHZ_R","Reader of field `FC0_MAX_KHZ`"],["R","Reader of register FC0_MAX_KHZ"],["W","Writer for register FC0_MAX_KHZ"]]});

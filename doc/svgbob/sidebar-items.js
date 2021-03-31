@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["to_svg","generate an SVG from the ascii text input"]],"struct":[["Grid",""],["Settings",""]]});

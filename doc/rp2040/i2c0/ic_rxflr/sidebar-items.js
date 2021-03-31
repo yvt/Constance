@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register IC_RXFLR"],["RXFLR_R","Reader of field `RXFLR`"]]});

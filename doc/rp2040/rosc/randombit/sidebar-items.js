@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register RANDOMBIT"],["RANDOMBIT_R","Reader of field `RANDOMBIT`"]]});

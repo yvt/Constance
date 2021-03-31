@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["STREAM_ADDR_W","Write proxy for field `STREAM_ADDR`"]],"type":[["R","Reader of register STREAM_ADDR"],["STREAM_ADDR_R","Reader of field `STREAM_ADDR`"],["W","Writer for register STREAM_ADDR"]]});

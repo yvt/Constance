@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register SM0_ADDR"],["SM0_ADDR_R","Reader of field `SM0_ADDR`"]]});

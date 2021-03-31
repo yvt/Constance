@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IC_FS_SCL_LCNT_W","Write proxy for field `IC_FS_SCL_LCNT`"]],"type":[["IC_FS_SCL_LCNT_R","Reader of field `IC_FS_SCL_LCNT`"],["R","Reader of register IC_FS_SCL_LCNT"],["W","Writer for register IC_FS_SCL_LCNT"]]});

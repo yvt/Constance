@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CYCLES_W","Write proxy for field `CYCLES`"],["ENABLE_W","Write proxy for field `ENABLE`"]],"type":[["COUNT_R","Reader of field `COUNT`"],["CYCLES_R","Reader of field `CYCLES`"],["ENABLE_R","Reader of field `ENABLE`"],["R","Reader of register TICK"],["RUNNING_R","Reader of field `RUNNING`"],["W","Writer for register TICK"]]});

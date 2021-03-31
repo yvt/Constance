@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register DORMANT"],["W","Writer for register DORMANT"]]});

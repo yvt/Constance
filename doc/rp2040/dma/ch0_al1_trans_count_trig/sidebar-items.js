@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register CH0_AL1_TRANS_COUNT_TRIG"]]});

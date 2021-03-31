@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["PARTNUMBER0_R","Reader of field `PARTNUMBER0`"],["R","Reader of register UARTPERIPHID0"]]});

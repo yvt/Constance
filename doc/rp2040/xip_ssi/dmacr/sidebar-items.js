@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RDMAE_W","Write proxy for field `RDMAE`"],["TDMAE_W","Write proxy for field `TDMAE`"]],"type":[["R","Reader of register DMACR"],["RDMAE_R","Reader of field `RDMAE`"],["TDMAE_R","Reader of field `TDMAE`"],["W","Writer for register DMACR"]]});

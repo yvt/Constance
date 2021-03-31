@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RXIFLSEL_W","Write proxy for field `RXIFLSEL`"],["TXIFLSEL_W","Write proxy for field `TXIFLSEL`"]],"type":[["R","Reader of register UARTIFLS"],["RXIFLSEL_R","Reader of field `RXIFLSEL`"],["TXIFLSEL_R","Reader of field `TXIFLSEL`"],["W","Writer for register UARTIFLS"]]});

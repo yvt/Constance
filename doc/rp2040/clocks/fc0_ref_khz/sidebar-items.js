@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FC0_REF_KHZ_W","Write proxy for field `FC0_REF_KHZ`"]],"type":[["FC0_REF_KHZ_R","Reader of field `FC0_REF_KHZ`"],["R","Reader of register FC0_REF_KHZ"],["W","Writer for register FC0_REF_KHZ"]]});

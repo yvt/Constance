@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["use_os_timer","Attach the implementation of `PortTimer` that is based on RZ/A1 OS Timer to a given system type. This macro also implements `Timer` on the system type. Requires [`OsTimerOptions`] and `Gic`."]],"trait":[["OsTimerOptions","The options for [`use_os_timer!`]."]]});

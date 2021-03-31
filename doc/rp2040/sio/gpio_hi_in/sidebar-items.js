@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["GPIO_HI_IN_R","Reader of field `GPIO_HI_IN`"],["R","Reader of register GPIO_HI_IN"]]});

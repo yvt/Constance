@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["INT_EP_ACTIVE_W","Write proxy for field `INT_EP_ACTIVE`"]],"type":[["INT_EP_ACTIVE_R","Reader of field `INT_EP_ACTIVE`"],["R","Reader of register INT_EP_CTRL"],["W","Writer for register INT_EP_CTRL"]]});

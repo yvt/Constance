@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ReadOnly","Read-only registers."],["ReadWrite","Read/Write registers."],["WriteOnly","Write-only registers."]]});

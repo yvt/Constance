@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["init_data","Initializes the `.data` section by copying it from the location indicated by `sidata`."],["zero_bss","Zeroes the `.bss` section."]],"trait":[["Word","Trait for machine word types."]]});

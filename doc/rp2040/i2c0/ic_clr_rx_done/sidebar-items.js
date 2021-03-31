@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CLR_RX_DONE_R","Reader of field `CLR_RX_DONE`"],["R","Reader of register IC_CLR_RX_DONE"]]});

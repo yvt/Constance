@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MULTI_CHAN_TRIGGER_W","Write proxy for field `MULTI_CHAN_TRIGGER`"]],"type":[["MULTI_CHAN_TRIGGER_R","Reader of field `MULTI_CHAN_TRIGGER`"],["R","Reader of register MULTI_CHAN_TRIGGER"],["W","Writer for register MULTI_CHAN_TRIGGER"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TryMutex","A mutual exclusion primitive that does not support blocking or poisoning. This results in a simpler and faster implementation."],["TryMutexGuard","A RAII scoped lock on a `TryMutex`. When this this structure is dropped, the mutex will be unlocked."]]});

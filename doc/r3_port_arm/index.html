@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="The Arm-A port for the R3 kernel."><meta name="keywords" content="rust, rustlang, rust-lang, r3_port_arm"><title>r3_port_arm - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../r3_port_arm/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate r3_port_arm</p><div class="block version"><p>Version 0.1.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all r3_port_arm's items</p></a><div class="block items"><ul><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="r3_port_arm" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">r3_port_arm</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/r3_port_arm/lib.rs.html#1-73" title="goto source code">[src]</a></span></h1><div class="docblock"><p>The Arm-A port for <a href="../r3/index.html">the R3 kernel</a>.</p>
+<h1 id="startup-code" class="section-header"><a href="#startup-code">Startup Code</a></h1>
+<p><a href="../r3_port_arm/macro.use_startup.html" title="use_startup!"><code>use_startup!</code></a> generates an entry point (with a symbol name <code>start</code>), which is expected to be called by a bootloader. The startup code configures MMU to assign appropriate memory attributes based on the memory map supplied by <a href="../r3_port_arm/trait.StartupOptions.html#associatedconstant.MEMORY_MAP" title="StartupOptions::MEMORY_MAP"><code>StartupOptions::MEMORY_MAP</code></a> and to map an exception vector table at <code>0x0000_0000</code> or <code>0xffff_0000</code>.</p>
+<h2 id="linker-scripts" class="section-header"><a href="#linker-scripts">Linker Scripts</a></h2>
+<p>This crate provides linker scripts that define some standard sections, suitable for use with a bootloader that can handle ELF sections. Put files as follows under your crate’s directory:</p>
+<p><code>.cargo/config.toml</code>:</p>
+<pre><code class="language-toml">[target.armv7a-none-eabi]
+rustflags = [&quot;-C&quot;, &quot;link-arg=-Tlink_ram.x&quot;]
+</code></pre>
+<p><code>memory.x</code>:</p>
+<pre><code class="language-text">MEMORY
+{
+  RAM : ORIGIN = 0x20000000, LENGTH = 10240K
+}
+</code></pre>
+<p><code>build.rs</code>:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="comment">// Use the linker script `memory.x` at the crate root</span>
+    <span class="macro">println</span><span class="macro">!</span>(
+        <span class="string">&quot;cargo:rustc-link-search={}&quot;</span>,
+        <span class="ident">std</span>::<span class="ident">env</span>::<span class="ident">current_dir</span>().<span class="ident">unwrap</span>().<span class="ident">display</span>()
+    );
+}</pre></div>
+<p>The following linker scripts are provided:</p>
+<ul>
+<li><code>link_ram.x</code> places all sections in <code>RAM</code>.</li>
+<li><code>link_ram_harvard.x</code> places <code>.text</code> in <code>RAM_CODE</code> and all remaining sections in <code>RAM_DATA</code>. Combined with an approriate MMU configuration, this can be used to implement the W⊕X (<a href="https://en.wikipedia.org/wiki/W%5EX">write xor execute</a>) memory policy for enhanced security. It might also lead to a performance improvement on a processor having separate buses for instruction and data access.</li>
+</ul>
+<h1 id="kernel-timing" class="section-header"><a href="#kernel-timing">Kernel Timing</a></h1>
+<p>As far as kernel timing is concerned, there is no universal solution for a Cortex-A system. This crate provides a port timer driver for <a href="https://developer.arm.com/documentation/ddi0271/d/">Arm PrimeCell SP804 Dual Timer</a>, which can be instantiated by <a href="../r3_port_arm/macro.use_sp804.html" title="use_sp804!"><code>use_sp804!</code></a>.</p>
+<h1 id="interrupt-controller" class="section-header"><a href="#interrupt-controller">Interrupt Controller</a></h1>
+<p>Your system type should be combined with an interrupt controller driver by implementing <a href="../r3/kernel/trait.PortInterrupts.html"><code>PortInterrupts</code></a> and <a href="../r3_port_arm/trait.InterruptController.html" title="InterruptController"><code>InterruptController</code></a>. Most systems are equipped with Arm Generic Interrupt Controller (GIC), whose driver is provided by <a href="../r3_port_arm/macro.use_gic.html" title="use_gic!"><code>use_gic!</code></a>.</p>
+<p>The maximum possible range of valid interrupt numbers is <code>0..1020</code> (the upper bound varies across implementations). The range is statically partitioned as follows:</p>
+<ul>
+<li><code>0..16</code> is used for SGIs (Software-Generated Interrupts), which are used for inter-processor communication. SGIs don’t support enabling, disabling, or changing their trigger modes.</li>
+<li><code>16..32</code> is used for PPIs (Private Peripheral Interrupts), which are peripheral interrupts specific to a single processor.</li>
+<li><code>32..</code> is used for SPIs (Shared Peripheral Interrupts), which are peripheral interrupts that the Distributor can route to a specified set of processors. The current implementation of the GIC driver routes all interrupts to CPU 0, assuming that’s where the application runs.</li>
+</ul>
+<p>The valid priority range is <code>0..255</code>. All priorities are <a href="../r3/kernel/trait.PortInterrupts.html#associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE"><em>managed</em></a> - unmanaged interrupts aren’t supported yet.</p>
+<p>The GIC driver exposes additional operations on interrupt lines through <a href="../r3_port_arm/trait.Gic.html" title="Gic"><code>Gic</code></a> implemented on your system type.</p>
+<h1 id="implementation" class="section-header"><a href="#implementation">Implementation</a></h1><h2 id="context-state" class="section-header"><a href="#context-state">Context state</a></h2>
+<p>The state of an interrupted thread is stored to the interrupted thread’s stack in the following form:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">struct</span> <span class="ident">ContextState</span> {
+    <span class="comment">// Second-level state</span>
+    <span class="comment">//</span>
+    <span class="comment">// Includes everything that is not included in the first-level state. These</span>
+    <span class="comment">// are moved between memory and registers only when switching tasks.</span>
+    <span class="comment">// TODO: Floating-point registers</span>
+    <span class="ident">r4</span>: <span class="ident">u32</span>,
+    <span class="ident">r5</span>: <span class="ident">u32</span>,
+    <span class="ident">r6</span>: <span class="ident">u32</span>,
+    <span class="ident">r7</span>: <span class="ident">u32</span>,
+    <span class="ident">r8</span>: <span class="ident">u32</span>,
+    <span class="ident">r9</span>: <span class="ident">u32</span>,
+    <span class="ident">r10</span>: <span class="ident">u32</span>,
+    <span class="ident">r11</span>: <span class="ident">u32</span>,
+
+    <span class="comment">// First-level state</span>
+    <span class="comment">//</span>
+    <span class="comment">// This was designed after Arm-M&#39;s exception frame.</span>
+    <span class="comment">//</span>
+    <span class="comment">// The GPR potion is comprised of caller-saved registers. In an exception</span>
+    <span class="comment">// handler, saving/restoring this set of registers at entry and exit allows</span>
+    <span class="comment">// it to call Rust functions.</span>
+    <span class="comment">//</span>
+    <span class="comment">// `{pc, cpsr}` is the sequence of registers that the RFE (return from</span>
+    <span class="comment">// exception) instruction expects to be in memory in this exact order.</span>
+    <span class="ident">r0</span>: <span class="ident">u32</span>,
+    <span class="ident">r1</span>: <span class="ident">u32</span>,
+    <span class="ident">r2</span>: <span class="ident">u32</span>,
+    <span class="ident">r3</span>: <span class="ident">u32</span>,
+    <span class="ident">r12</span>: <span class="ident">u32</span>,
+    <span class="ident">lr</span>: <span class="ident">u32</span>,
+    <span class="ident">pc</span>: <span class="ident">u32</span>,
+    <span class="ident">cpsr</span>: <span class="ident">u32</span>,
+}</pre></div>
+<p><code>sp</code> is stored in <a href="../r3/kernel/task/struct.TaskCb.html#structfield.port_task_state"><code>TaskCb::port_task_state</code></a>.</p>
+<p>When a task is activated, a new context state is created inside the task’s stack. By default, only essential registers are preloaded with known values. The <strong><code>preload-registers</code></strong> Cargo feature enables preloading for all GPRs, which might help in debugging at the cost of performance and code size.</p>
+<p>For the idle task, saving and restoring the context store is essentially replaced with no-op or loads of hard-coded values. In particular, <code>pc</code> is always “restored” with the entry point of the idle task.</p>
+<h2 id="processor-modes" class="section-header"><a href="#processor-modes">Processor Modes</a></h2>
+<ul>
+<li><strong>System</strong>: Task context. The idle task (the implicit task that runs when <code>*</code><a href="../r3/kernel/struct.State.html#method.running_task_ptr"><code>running_task_ptr</code></a><code>().is_none()</code>) uses this mode with <code>sp_usr == 0</code> (no other tasks or non-task contexts use <code>sp == 0</code>, so this is straightforward to detect).</li>
+<li><strong>Supervisor</strong>: Non-task context</li>
+<li><strong>IRQ</strong>: The processor enters this mode when it takes an exception. This state lasts only briefly because the IRQ handler switches to Supervisor as soon as possible to allow reentry. <code>sp_irq</code> is only used as a scratch register.</li>
+</ul>
+</div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<table><tr class="module-item"><td><a class="macro" href="macro.use_gic.html" title="r3_port_arm::use_gic macro">use_gic</a></td><td class="docblock-short"><p>Implement <a href="../r3/kernel/trait.PortInterrupts.html"><code>PortInterrupts</code></a>, <a href="../r3_port_arm/trait.InterruptController.html"><code>InterruptController</code></a>, and <a href="../r3_port_arm/trait.Gic.html" title="Gic"><code>Gic</code></a> on
+the given system type using the General Interrupt Controller (GIC) on the
+target.
+<strong>Requires <a href="../r3_port_arm/trait.GicOptions.html" title="GicOptions"><code>GicOptions</code></a>.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_port.html" title="r3_port_arm::use_port macro">use_port</a></td><td class="docblock-short"><p>Define a system type implementing <a href="../r3/kernel/trait.PortThreading.html"><code>PortThreading</code></a> and <a href="../r3_port_arm/trait.EntryPoint.html" title="EntryPoint"><code>EntryPoint</code></a>.
+<strong>Requires <a href="../r3_port_arm/trait.ThreadingOptions.html" title="ThreadingOptions"><code>ThreadingOptions</code></a>, <a href="../r3_port_arm/trait.InterruptController.html" title="InterruptController"><code>InterruptController</code></a>, and <a href="../r3_port_arm/trait.Timer.html" title="Timer"><code>Timer</code></a>.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_sp804.html" title="r3_port_arm::use_sp804 macro">use_sp804</a></td><td class="docblock-short"><p>Attach the implementation of <a href="../r3/kernel/trait.PortTimer.html"><code>PortTimer</code></a> that is based on
+<a href="https://developer.arm.com/documentation/ddi0271/d/">Arm PrimeCell SP804 Dual Timer</a> to a given system type. This macro also
+implements <a href="../r3_port_arm/trait.Timer.html"><code>Timer</code></a> on the system type.
+<strong>Requires <a href="../r3_port_arm/trait.Sp804Options.html" title="Sp804Options"><code>Sp804Options</code></a>.</strong></p>
+</td></tr><tr class="module-item"><td><a class="macro" href="macro.use_startup.html" title="r3_port_arm::use_startup macro">use_startup</a></td><td class="docblock-short"><p>Generate <a href="../r3_port_arm/index.html#startup-code">startup code</a>. <strong>Requires <a href="../r3_port_arm/trait.StartupOptions.html" title="StartupOptions"><code>StartupOptions</code></a> and <a href="../r3_port_arm/trait.EntryPoint.html"><code>EntryPoint</code></a> to
+be implemented.</strong></p>
+</td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.MemoryMapSection.html" title="r3_port_arm::MemoryMapSection struct">MemoryMapSection</a></td><td class="docblock-short"></td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.InterruptLineTriggerMode.html" title="r3_port_arm::InterruptLineTriggerMode enum">InterruptLineTriggerMode</a></td><td class="docblock-short"><p>Specifies the type of signal transition that pends an interrupt.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.SetInterruptLineTriggerModeError.html" title="r3_port_arm::SetInterruptLineTriggerModeError enum">SetInterruptLineTriggerModeError</a></td><td class="docblock-short"></td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.EntryPoint.html" title="r3_port_arm::EntryPoint trait">EntryPoint</a></td><td class="docblock-short"><p>Defines the entry points of a port instantiation. Implemented by
+<a href="../r3_port_arm/macro.use_port.html" title="use_port!"><code>use_port!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Gic.html" title="r3_port_arm::Gic trait">Gic</a></td><td class="docblock-short"><p>Provides access to a system-global GIC instance. Implemented by <a href="../r3_port_arm/macro.use_gic.html" title="use_gic!"><code>use_gic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.GicOptions.html" title="r3_port_arm::GicOptions trait">GicOptions</a></td><td class="docblock-short"><p>The options for <a href="../r3_port_arm/macro.use_gic.html" title="use_gic!"><code>use_gic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.InterruptController.html" title="r3_port_arm::InterruptController trait">InterruptController</a></td><td class="docblock-short"><p>An abstract interface to an interrupt controller. Implemented by
+<a href="../r3_port_arm/macro.use_gic.html" title="use_gic!"><code>use_gic!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Sp804Options.html" title="r3_port_arm::Sp804Options trait">Sp804Options</a></td><td class="docblock-short"><p>The options for <a href="../r3_port_arm/macro.use_sp804.html" title="use_sp804!"><code>use_sp804!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.StartupOptions.html" title="r3_port_arm::StartupOptions trait">StartupOptions</a></td><td class="docblock-short"><p>The options for <a href="../r3_port_arm/macro.use_startup.html" title="use_startup!"><code>use_startup!</code></a>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.ThreadingOptions.html" title="r3_port_arm::ThreadingOptions trait">ThreadingOptions</a></td><td class="docblock-short"><p>The configuration of the port.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Timer.html" title="r3_port_arm::Timer trait">Timer</a></td><td class="docblock-short"><p>An abstract inferface to a port timer driver. Implemented by
+<a href="../r3_port_arm/macro.use_sp804.html" title="use_sp804!"><code>use_sp804!</code></a>.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="r3_port_arm" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>

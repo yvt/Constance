@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CLK_SYS_RESUS_W","Write proxy for field `CLK_SYS_RESUS`"]],"type":[["CLK_SYS_RESUS_R","Reader of field `CLK_SYS_RESUS`"],["R","Reader of register INTF"],["W","Writer for register INTF"]]});

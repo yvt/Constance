@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CH0_DBG_CTDREQ_R","Reader of field `CH0_DBG_CTDREQ`"],["R","Reader of register CH0_DBG_CTDREQ"]]});

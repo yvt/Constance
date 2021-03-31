@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register FIFO_LEVELS"],["RAF_LVL_R","Reader of field `RAF_LVL`"],["TDF_LVL_R","Reader of field `TDF_LVL`"],["WAF_LVL_R","Reader of field `WAF_LVL`"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FBDIV_INT_W","Write proxy for field `FBDIV_INT`"]],"type":[["FBDIV_INT_R","Reader of field `FBDIV_INT`"],["R","Reader of register FBDIV_INT"],["W","Writer for register FBDIV_INT"]]});

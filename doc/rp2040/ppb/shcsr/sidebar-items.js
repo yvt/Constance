@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SVCALLPENDED_W","Write proxy for field `SVCALLPENDED`"]],"type":[["R","Reader of register SHCSR"],["SVCALLPENDED_R","Reader of field `SVCALLPENDED`"],["W","Writer for register SHCSR"]]});

@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Implemented by a port. This trait contains items related to controlling interrupt lines."><meta name="keywords" content="rust, rustlang, rust-lang, PortInterrupts"><title>r3::kernel::PortInterrupts - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc trait"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../r3/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Trait PortInterrupts</p><div class="sidebar-elems"><div class="block items"><a class="sidebar-title" href="#associated-const">Associated Constants</a><div class="sidebar-links"><a href="#associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE">MANAGED_INTERRUPT_PRIORITY_RANGE</a><a href="#associatedconstant.MANAGED_INTERRUPT_LINES">MANAGED_INTERRUPT_LINES</a></div><a class="sidebar-title" href="#provided-methods">Provided Methods</a><div class="sidebar-links"><a href="#method.set_interrupt_line_priority">set_interrupt_line_priority</a><a href="#method.enable_interrupt_line">enable_interrupt_line</a><a href="#method.disable_interrupt_line">disable_interrupt_line</a><a href="#method.pend_interrupt_line">pend_interrupt_line</a><a href="#method.clear_interrupt_line">clear_interrupt_line</a><a href="#method.is_interrupt_line_pending">is_interrupt_line_pending</a></div><a class="sidebar-title" href="#implementors">Implementors</a></div><p class="location"><a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a></p><div id="sidebar-vars" data-name="PortInterrupts" data-ty="trait" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Trait <a href="../index.html">r3</a>::<wbr><a href="index.html">kernel</a>::<wbr><a class="trait" href="">PortInterrupts</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/r3/kernel.rs.html#578-633" title="goto source code">[src]</a></span></h1><div class="docblock type-decl hidden-by-usual-hider"><pre class="rust trait">pub unsafe trait PortInterrupts: <a class="trait" href="../../r3/kernel/trait.KernelCfg1.html" title="trait r3::kernel::KernelCfg1">KernelCfg1</a> {
+    const <a href="#associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE" class="constant"><b>MANAGED_INTERRUPT_PRIORITY_RANGE</b></a>: <a class="struct" href="https://doc.rust-lang.org/nightly/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="type" href="../../r3/kernel/type.InterruptPriority.html" title="type r3::kernel::InterruptPriority">InterruptPriority</a>&gt;;
+    const <a href="#associatedconstant.MANAGED_INTERRUPT_LINES" class="constant"><b>MANAGED_INTERRUPT_LINES</b></a>: &amp;'static [<a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a>];
+    unsafe fn <a href="#method.set_interrupt_line_priority" class="fnname">set_interrupt_line_priority</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_priority: <a class="type" href="../../r3/kernel/type.InterruptPriority.html" title="type r3::kernel::InterruptPriority">InterruptPriority</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.SetInterruptLinePriorityError.html" title="enum r3::kernel::SetInterruptLinePriorityError">SetInterruptLinePriorityError</a>&gt; { ... }
+<div class="item-spacer"></div>    unsafe fn <a href="#method.enable_interrupt_line" class="fnname">enable_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.EnableInterruptLineError.html" title="enum r3::kernel::EnableInterruptLineError">EnableInterruptLineError</a>&gt; { ... }
+<div class="item-spacer"></div>    unsafe fn <a href="#method.disable_interrupt_line" class="fnname">disable_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.EnableInterruptLineError.html" title="enum r3::kernel::EnableInterruptLineError">EnableInterruptLineError</a>&gt; { ... }
+<div class="item-spacer"></div>    unsafe fn <a href="#method.pend_interrupt_line" class="fnname">pend_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.PendInterruptLineError.html" title="enum r3::kernel::PendInterruptLineError">PendInterruptLineError</a>&gt; { ... }
+<div class="item-spacer"></div>    unsafe fn <a href="#method.clear_interrupt_line" class="fnname">clear_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ClearInterruptLineError.html" title="enum r3::kernel::ClearInterruptLineError">ClearInterruptLineError</a>&gt; { ... }
+<div class="item-spacer"></div>    unsafe fn <a href="#method.is_interrupt_line_pending" class="fnname">is_interrupt_line_pending</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>&nbsp;&nbsp;&nbsp;&nbsp;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;bool, <a class="enum" href="../../r3/kernel/enum.QueryInterruptLineError.html" title="enum r3::kernel::QueryInterruptLineError">QueryInterruptLineError</a>&gt; { ... }
+}</pre></div><div class="docblock"><p>Implemented by a port. This trait contains items related to controlling
+interrupt lines.</p>
+<h1 id="safety" class="section-header"><a href="#safety">Safety</a></h1>
+<p>Implementing a port is inherently unsafe because it’s responsible for
+initializing the execution environment and providing a dispatcher
+implementation.</p>
+<p>These methods are only meant to be called by the kernel.</p>
+<style type="text/css">
+/* Cover image, something that is definitely relevant to the subject */
+.distractor {
+    margin: 0 auto;
+    max-width: 600px;
+}
+.distractor > a {
+    display: block;
+    background-size: cover;
+    /* background: ...; — specified by inline style */
+    /* padding-bottom: ...; — specified by inline style */
+}
+
+/* Table of contents */
+.toc-header + ul {
+    background: rgba(128, 128, 128, 0.1);
+    margin: 1em 0; padding: 1em;
+    width: 40%;
+    min-width: 280px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+.toc-header + ul::before {
+    content: "Contents";
+    font-weight: bold;
+}
+.toc-header + ul ul { margin-bottom: 0; }
+.toc-header + ul li { list-style: none; }
+
+/* Poor man's admonition
+ *
+ * # Usage
+ *
+ * ## Normal
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > **Title:** lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     > lorem ipsum
+ *
+ * ## Collapsible
+ *
+ *     <div class="admonition-follows"></div>
+ *
+ *     > <details>
+ *     > <summary>Title</summary>
+ *     >
+ *     > lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+ *     >
+ *     > </details>
+ */
+.admonition-follows + blockquote {
+    background: rgba(128, 128, 128, 0.1) !important;
+    margin: 1em !important; padding: 1em 1em 0 !important;
+    color: inherit !important; overflow: hidden;
+}
+.admonition-follows + blockquote::after { /* collapsible padding */
+    content: ""; display: block; margin-top: 1em;
+}
+
+.admonition-follows + blockquote summary {
+    cursor: pointer;
+    will-change: opacity;
+    user-select: none;
+    -webkit-user-select: none;
+    font-weight: bold;
+}
+.admonition-follows + blockquote summary:not([open]):not(:hover) {
+    opacity: 0.5;
+}
+.admonition-follows + blockquote summary + * {
+    margin-top: 1em;
+}
+
+/* Display a warning if some Cargo features are disabled. */
+.disabled-feature-warning > p > span:before { content: "Warning:"; font-weight: bold; }
+.disabled-feature-warning > p > span:after { content: " This documentation was built without a "; }
+.disabled-feature-warning > p > code:before { content: "--all-features"; }
+.disabled-feature-warning > p:after { content: " build option. Some items might be missing."; }
+
+/* Center an inline image
+ *
+ * # Usage
+ *
+ *    <span class="center">![kernel-traits]</span>
+ *
+ *    [kernel-traits]: data:image/svg+xml;base64,< super long base64 data >
+ *
+ * The image wouldn't render if `![kernel-traits]` were wrapped with `<center>`
+ * because the Markdown processor doesn't do Markdown processing inside a block
+ * element. On the other hand, it thinks `<span>` is an inline element (by
+ * default), so markups inside `<span>` are processed.
+ *
+ * For diagrams processed by `::svgbobdoc`, just use `<center>`.
+ */
+span.center {
+    display: block;
+    text-align: center;
+}
+
+/* Add margins to SvgBob images */
+span.center img, center img {
+    border: 10px solid white;
+}
+
+/* Auto-invert SvgBob images in a dark theme */
+body.theme-dark span.center img, body.theme-dark center img {
+    filter: invert(88%);
+}
+
+body.theme-ayu span.center img, body.theme-ayu center img {
+    filter: invert(89%) sepia(90%) hue-rotate(180deg);
+}
+
+/* FIXME: rustdoc's intra-doc processor generates a warning when it encounters a
+   bracketed text with an unknown link target. This misfires for CSS attribute
+   selectors. Make rustdoc happy by defining a fake link target. I'm not sure if
+   it's worth reporting.
+
+[open]: #dummy
+
+*/
+</style>
+<script type="application/javascript">
+<!--
+// Monitors the current rustdoc theme and adds `.theme-NAME` to `<body>`
+function initThemeMonitor() {
+    if (typeof switchTheme !== 'function' ||
+        typeof themeStyle !== 'object' ||
+        typeof document.body.classList === 'undefined')
+    {
+        // Something is wrong, don't do anything
+        return;
+    }
+
+    var currentClassName = null;
+    function onApplyTheme(name) {
+        if (currentClassName != null) {
+            document.body.classList.remove(currentClassName);
+        }
+        currentClassName = "theme-" + name;
+        document.body.classList.add(currentClassName);
+    }
+
+    var match = themeStyle.href.match(/([a-z]+)\.css$/);
+    var currentStyle = (match && match[1]) || "light";
+    onApplyTheme(currentStyle);
+
+    // Intercept calls to `switchTheme`
+    var originalSwitchTheme = switchTheme;
+    switchTheme = function (_0, _1, newTheme) {
+        onApplyTheme(newTheme);
+        originalSwitchTheme.apply(this, arguments);
+    };
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initThemeMonitor();
+} else {
+    document.addEventListener('DOMContentLoaded', initThemeMonitor);
+}
+-->
+</script></div><h2 id="associated-const" class="small-section-header">Associated Constants<a href="#associated-const" class="anchor"></a></h2><div class="methods"><h3 id="associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE" class="method"><code>const <a href="#associatedconstant.MANAGED_INTERRUPT_PRIORITY_RANGE" class="constant"><b>MANAGED_INTERRUPT_PRIORITY_RANGE</b></a>: <a class="struct" href="https://doc.rust-lang.org/nightly/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="type" href="../../r3/kernel/type.InterruptPriority.html" title="type r3::kernel::InterruptPriority">InterruptPriority</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#585" title="goto source code">[src]</a></h3><div class="docblock"><p>The range of interrupt priority values considered <a href="../../r3/index.html#interrupt-handling-framework">managed</a>.</p>
+<p>Defaults to <code>0..0</code> (empty) when unspecified.</p>
+</div><h3 id="associatedconstant.MANAGED_INTERRUPT_LINES" class="method"><code>const <a href="#associatedconstant.MANAGED_INTERRUPT_LINES" class="constant"><b>MANAGED_INTERRUPT_LINES</b></a>: &amp;'static [<a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a>]</code><a class="srclink" href="../../src/r3/kernel.rs.html#595" title="goto source code">[src]</a></h3><div class="docblock"><p>The list of interrupt lines which are considered <a href="../../r3/index.html#interrupt-handling-framework">managed</a>.</p>
+<p>Defaults to <code>&amp;[]</code> (empty) when unspecified.</p>
+<p>This is useful when the driver employs a fixed priority scheme and
+doesn’t support changing interrupt line priorities.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="provided-methods" class="small-section-header">Provided methods<a href="#provided-methods" class="anchor"></a></h2><div class="methods"><h3 id="method.set_interrupt_line_priority" class="method"><code>unsafe fn <a href="#method.set_interrupt_line_priority" class="fnname">set_interrupt_line_priority</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;_priority: <a class="type" href="../../r3/kernel/type.InterruptPriority.html" title="type r3::kernel::InterruptPriority">InterruptPriority</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.SetInterruptLinePriorityError.html" title="enum r3::kernel::SetInterruptLinePriorityError">SetInterruptLinePriorityError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#600-605" title="goto source code">[src]</a></h3><div class="docblock"><p>Set the priority of the specified interrupt line.</p>
+<p>Precondition: CPU Lock active. Task context or boot phase.</p>
+</div><h3 id="method.enable_interrupt_line" class="method"><code>unsafe fn <a href="#method.enable_interrupt_line" class="fnname">enable_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.EnableInterruptLineError.html" title="enum r3::kernel::EnableInterruptLineError">EnableInterruptLineError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#608-610" title="goto source code">[src]</a></h3><div class="docblock"><p>Enable the specified interrupt line.</p>
+</div><h3 id="method.disable_interrupt_line" class="method"><code>unsafe fn <a href="#method.disable_interrupt_line" class="fnname">disable_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.EnableInterruptLineError.html" title="enum r3::kernel::EnableInterruptLineError">EnableInterruptLineError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#613-615" title="goto source code">[src]</a></h3><div class="docblock"><p>Disable the specified interrupt line.</p>
+</div><h3 id="method.pend_interrupt_line" class="method"><code>unsafe fn <a href="#method.pend_interrupt_line" class="fnname">pend_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.PendInterruptLineError.html" title="enum r3::kernel::PendInterruptLineError">PendInterruptLineError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#618-620" title="goto source code">[src]</a></h3><div class="docblock"><p>Set the pending flag of the specified interrupt line.</p>
+</div><h3 id="method.clear_interrupt_line" class="method"><code>unsafe fn <a href="#method.clear_interrupt_line" class="fnname">clear_interrupt_line</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(), <a class="enum" href="../../r3/kernel/enum.ClearInterruptLineError.html" title="enum r3::kernel::ClearInterruptLineError">ClearInterruptLineError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#623-625" title="goto source code">[src]</a></h3><div class="docblock"><p>Clear the pending flag of the specified interrupt line.</p>
+</div><h3 id="method.is_interrupt_line_pending" class="method"><code>unsafe fn <a href="#method.is_interrupt_line_pending" class="fnname">is_interrupt_line_pending</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;_line: <a class="type" href="../../r3/kernel/type.InterruptNum.html" title="type r3::kernel::InterruptNum">InterruptNum</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;bool, <a class="enum" href="../../r3/kernel/enum.QueryInterruptLineError.html" title="enum r3::kernel::QueryInterruptLineError">QueryInterruptLineError</a>&gt;</code><a class="srclink" href="../../src/r3/kernel.rs.html#628-632" title="goto source code">[src]</a></h3><div class="docblock"><p>Read the pending flag of the specified interrupt line.</p>
+</div></div><span class="loading-content">Loading content...</span><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"></div><span class="loading-content">Loading content...</span><script type="text/javascript" src="../../implementors/r3/kernel/trait.PortInterrupts.js" async></script></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="r3" data-search-js="../../search-index.js"></div>
+    <script src="../../main.js"></script></body></html>

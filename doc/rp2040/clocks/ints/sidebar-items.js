@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["CLK_SYS_RESUS_R","Reader of field `CLK_SYS_RESUS`"],["R","Reader of register INTS"]]});

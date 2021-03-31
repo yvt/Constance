@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["MANUFACTURER_R","Reader of field `MANUFACTURER`"],["PART_R","Reader of field `PART`"],["R","Reader of register CHIP_ID"],["REVISION_R","Reader of field `REVISION`"]]});

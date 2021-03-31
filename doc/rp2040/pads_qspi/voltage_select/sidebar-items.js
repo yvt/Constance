@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["VOLTAGE_SELECT_A","Value on reset: 0"]],"struct":[["VOLTAGE_SELECT_W","Write proxy for field `VOLTAGE_SELECT`"]],"type":[["R","Reader of register VOLTAGE_SELECT"],["VOLTAGE_SELECT_R","Reader of field `VOLTAGE_SELECT`"],["W","Writer for register VOLTAGE_SELECT"]]});

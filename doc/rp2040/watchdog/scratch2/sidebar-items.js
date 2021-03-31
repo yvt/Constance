@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register SCRATCH2"],["W","Writer for register SCRATCH2"]]});

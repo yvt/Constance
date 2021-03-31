@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["R","Reader of register PROC1_NMI_MASK"],["W","Writer for register PROC1_NMI_MASK"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["IC_COMP_TYPE_R","Reader of field `IC_COMP_TYPE`"],["R","Reader of register IC_COMP_TYPE"]]});

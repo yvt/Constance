@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GPIO_OE_CLR_W","Write proxy for field `GPIO_OE_CLR`"]],"type":[["GPIO_OE_CLR_R","Reader of field `GPIO_OE_CLR`"],["R","Reader of register GPIO_OE_CLR"],["W","Writer for register GPIO_OE_CLR"]]});

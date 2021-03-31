@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This crate provides a procedural macro that renders ASCII diagrams in doc comments as SVG images using `svgbob`."><meta name="keywords" content="rust, rustlang, rust-lang, svgbobdoc"><title>svgbobdoc - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../svgbobdoc/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate svgbobdoc</p><div class="block version"><p>Version 0.2.3</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all svgbobdoc's items</p></a><p class="location"></p><div id="sidebar-vars" data-name="svgbobdoc" data-ty="mod" data-relpath="../"></div></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">svgbobdoc</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/svgbobdoc/lib.rs.html#1-415" title="goto source code">[src]</a></span></h1><div class="docblock"><p>This crate provides a procedural macro that renders
+ASCII diagrams in doc comments as SVG images using <a href="https://github.com/ivanceras/svgbob"><code>svgbob</code></a>.</p>
+<p><img src="https://yvt.github.io/svgbobdoc/20190529-zhang_hilbert-2.png"
+   style="border: 10px solid rgba(192, 192, 192, 0.15)"></p>
+<h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
+<p>Add the following line to <code>Cargo.toml</code>.</p>
+<pre><code class="language-toml">[dependencies]
+svgbobdoc = &quot;0.2&quot;
+</code></pre>
+<p>Add the attribute <code>#[svgbobdoc::transform]</code> to the items to documentate.
+Use <code>svgbob</code> code blocks to write ASCII diagrams.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">svgbobdoc</span>::<span class="ident">transform</span>]</span>
+<span class="doccomment">/// Some structure.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```svgbob</span>
+<span class="doccomment">///  .--------------------.</span>
+<span class="doccomment">///  | Diagrams here      |</span>
+<span class="doccomment">///  `--------------------&#39;</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TestStruct</span> {}</pre></div>
+<p>See the <code>example</code> directory for a complete example.</p>
+<h2 id="tips" class="section-header"><a href="#tips">Tips</a></h2>
+<ul>
+<li>Using this macro increases the compilation time. If you don’t mind
+activating unstable features, the <code>doc_cfg</code> feature (<a href="https://github.com/rust-lang/rust/issues/43781">#43781</a>) can be
+used to conditionally enable the macro by the syntax
+<code>#[cfg_attr(doc, svgbobdoc::transform)]</code>.</li>
+</ul>
+<h1 id="other-forms-of-macros" class="section-header"><a href="#other-forms-of-macros">Other forms of macros</a></h1>
+<p>The macro is currently implemented as an attribute macro, which has
+restrictions, e.g., they cannot be attached to fields and non-inline
+modules. Other forms of macros were considered, but they were unusable for
+this purpose for the following reasons:</p>
+<ul>
+<li>
+<p>Function-like macros producing a string literal
+(<code>#[doc = svgbobdoc::to_svg!(&quot;...&quot;)]</code>): Macros in this position aren’t
+expanded, causing a parsing error.</p>
+</li>
+<li>
+<p>Function-like macros producing a part of an attribute
+(<code>#[svgbobdoc::doc!(&quot;...&quot;)]</code>): Macros in this position aren’t expanded,
+causing a parsing error.</p>
+</li>
+<li>
+<p>Function-like macros expanding to an attribute (<code>svgbobdoc::doc!(&quot;...&quot;)</code>):
+Procedural macros cannot expand to an attribute.</p>
+</li>
+</ul>
+<p>Therefore, despite its downsides, an attribute macro is the only working
+solution known at the moment.</p>
+</div><h2 id="attributes" class="section-header"><a href="#attributes">Attribute Macros</a></h2>
+<table><tr class="module-item"><td><a class="attr" href="attr.transform.html" title="svgbobdoc::transform attr">transform</a></td><td class="docblock-short"><p>Render ASCII-diagram code blocks in doc comments as SVG images.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="svgbobdoc" data-search-js="../search-index.js"></div>
+    <script src="../main.js"></script></body></html>
